@@ -1,0 +1,35 @@
+﻿@page "/transactions"
+
+@if (transactions == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Transaktionsdatum</th>
+                <th>Transaktionsnamn</th>
+                <th>Kategori</th>
+                <th>Summa</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in transactions)
+            {
+                <Transaction TransactionDate="@transaction.TransactionDate" Name="@transaction.Name" Category="@transaction.Category" Sum="@transaction.Sum" />
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    public List<Transaction> transactions = new List<Transaction>()
+{
+        new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", "Mat", 369.72m)
+    };
+
+}
