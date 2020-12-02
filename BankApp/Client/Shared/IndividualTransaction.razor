@@ -1,16 +1,16 @@
 ﻿<tr style="background-color: @Transaction.Category.Color; opacity: 0,4;">
-    <td>@Transaction.TransactionDate.ToString()</td>
+    <td>@Transaction.TransactionDate.ToShortDateString()</td>
     <td>@Transaction.Name</td>
-    <td>@Transaction.Category.Name</td>
-    <td>@Transaction.Sum.ToString() kr</td>
-    <td class="btn btn-dark">
+    <td>
         <select @onchange="((e) => SetCategory(Transaction, e))">
             @foreach (var category in Categories)
             {
-                <option value="@category.Name">@category.Name</option>
+                var selected = category.Name.Equals(Transaction.Category.Name) ? "selected" : null;
+                <option selected="@selected" value="@category.Name">@category.Name</option>
             }
-    </select>
-</td>
+        </select>
+    </td>
+    <td>@Transaction.Amount.ToString() kr</td>
 </tr>
 
 

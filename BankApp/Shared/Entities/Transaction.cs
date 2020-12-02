@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BankApp.Shared
+namespace BankApp.Shared.Entities
 {
     public class Transaction
     {
@@ -11,18 +11,18 @@ namespace BankApp.Shared
         {
 
         }
-        public Transaction(DateTime transactionDate, string name, Category category, decimal sum)
+        public Transaction(DateTime transactionDate, string name, Category category, decimal amount)
         {
             TransactionDate = transactionDate;
             Name = name;
             Category = category;
-            Sum = Math.Round(sum, 2);
+            Amount = Math.Round(amount, 2);
         }
 
         public int Id { get; set; }
         public DateTime TransactionDate { get; set; }
         public string Name { get; set; }
         public Category Category { get; set; }
-        public decimal Sum { get; set; }
+        public decimal Amount { get; set; }
     }
 }

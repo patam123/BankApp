@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BankApp.Shared;
+using BankApp.Shared.Entities;
 
 namespace BankApp.Client.Shared
 {
@@ -22,6 +22,7 @@ namespace BankApp.Client.Shared
             Category category = Categories.Find(x => x.Name.Equals(e.Value));
             transaction.Category = category;
             Console.WriteLine($"{transaction.Name} har lagts till i kategorin \"{category.Name}\"");
+            // => skicka till api.
         }
     }
 }

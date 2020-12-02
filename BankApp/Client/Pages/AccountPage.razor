@@ -1,0 +1,19 @@
+﻿@page "/account"
+@using BankApp.Shared.Entities
+
+<h3>Kontoinformation</h3>
+
+<DetailedAccountInformationHeader BankAccount="bankAccount" />
+
+@code{
+    private BankAccount bankAccount;
+
+    protected override void OnInitialized()
+    {
+        bankAccount = new BankAccount() { Id = 1 };
+    }
+}
+
+
+
+

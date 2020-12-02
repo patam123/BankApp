@@ -1,0 +1,64 @@
+﻿<div style="display: flex; justify-content: space-between; align-items: baseline">
+    <p style="font-size: 16px;">Detaljerad information</p><p>@BankAccount.Id</p>
+    <button @onclick="ChangeDisplayInterval" class="btn btn-dark">@buttonText</button>
+    <div style="@style">
+        <label for="from">Från</label>
+        <input id="from" name="from" type="date" min="2000-01-01" @onchange="((e) => SetFromDate(e))" />
+    </div>
+    <div style="@style">
+        <label for="to">Till</label>
+        <input id="to" name="to" type="date" max="@DateTime.Today.ToShortDateString()" @onchange="((e) => SetToDate(e))" />
+    </div>
+    <p>Tidsintervall: <div style="display:flex; flex-direction: column; text-align:center;"><span>@fromDate.ToShortDateString()</span> - <span>@toDate.ToShortDateString()</span></div></p>
+    
+</div>
+
+@code {
+
+    string buttonText = "Ändra tidsintervall";
+    string style = "display: none";
+    DateTime fromDate = DateTime.Today.AddMonths(-1);
+    DateTime toDate = DateTime.Today;
+
+    bool isHidden = true;
+
+    void SetFromDate(ChangeEventArgs e) // consider refactoring, kan plockas ut för att använda till transactions också
+    {
+        var year = int.Parse(e.Value.ToString().Substring(0, 4));
+        var month = int.Parse(e.Value.ToString().Substring(5, 2));
+        var day = int.Parse(e.Value.ToString().Substring(8, 2));
+
+        fromDate = new DateTime(year, month, day);
+        Console.WriteLine(fromDate);
+        //var newFromDate = new DateTime((e.Value);
+    }
+
+    void SetToDate(ChangeEventArgs e)
+    {
+        var year = int.Parse(e.Value.ToString().Substring(0, 4));
+        var month = int.Parse(e.Value.ToString().Substring(5, 2));
+        var day = int.Parse(e.Value.ToString().Substring(8, 2));
+
+        toDate = new DateTime(year, month, day);
+        Console.WriteLine(toDate);
+        //var newFromDate = new DateTime((e.Value);
+    }
+
+
+
+    void ChangeDisplayInterval()
+    {
+        if (isHidden)
+        {
+            style = "display: none";
+            buttonText = "Ändra tidsintervall";
+            isHidden = false;
+        }
+        else
+        {
+            style = "display:flex; flex-direction: column";
+            buttonText = "Dölj";
+            isHidden = true;
+        }
+    }
+}
