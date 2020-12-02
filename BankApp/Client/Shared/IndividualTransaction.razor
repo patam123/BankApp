@@ -1,0 +1,16 @@
+﻿<tr style="background-color: @Transaction.Category.Color; opacity: 0,4;">
+    <td>@Transaction.TransactionDate.ToString()</td>
+    <td>@Transaction.Name</td>
+    <td>@Transaction.Category.Name</td>
+    <td>@Transaction.Sum.ToString() kr</td>
+    <td class="btn btn-dark">
+        <select @onchange="((e) => SetCategory(Transaction, e))">
+            @foreach (var category in Categories)
+            {
+                <option value="@category.Name">@category.Name</option>
+            }
+    </select>
+</td>
+</tr>
+
+

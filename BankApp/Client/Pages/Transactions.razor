@@ -1,5 +1,9 @@
 ﻿@page "/transactions"
 
+@using BankApp.Shared;
+
+<TransactionHeader />
+
 @if (transactions == null)
 {
     <p><em>Loading...</em></p>
@@ -17,19 +21,48 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var transaction in transactions)
+            @for (int i = index * pageSize; i < (transactions.Count > ((index + 1) * pageSize) ? ((index + 1) * pageSize) : transactions.Count); i++)
             {
-                <Transaction TransactionDate="@transaction.TransactionDate" Name="@transaction.Name" Category="@transaction.Category" Sum="@transaction.Sum" />
+                <IndividualTransaction Transaction="transactions[i]" Categories="categories" />
             }
         </tbody>
     </table>
 }
 
 @code {
-
-    public List<Transaction> transactions = new List<Transaction>()
-{
-        new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", "Mat", 369.72m)
+    int index = 0;
+    int pageSize = 5;
+    public List<Transaction> transactions;
+    public List<Category> categories = new List<Category>()
+    {
+        new Category() { Name = "Mat", Color = "red" },
+        new Category() { Name = "Kläder", Color = "pink" },
+        new Category() { Name = "Transport", Color = "brown" },
+        new Category() { Name = "Bostad", Color = "blue" },
+        new Category() { Name = "Uteliv", Color = "yellow" },
+        new Category() { Name = "Fritidsaktivitet", Color = "green" },
     };
+
+    protected override void OnInitialized()
+    {
+        transactions = new List<Transaction>()
+
+    {
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Maxi Partille", new Category{ Name = "Mat", Color = "red"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m)
+
+        };
+    }
+
+    public void SetIndex(int i)
+    {
+        index = i - 1;
+    }
 
 }

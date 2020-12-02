@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30711.63
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankApp.Server", "BankApp\Server\BankApp.Server.csproj", "{D82E3034-C43D-40F0-A131-17E4F9F12937}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApp.Server", "BankApp\Server\BankApp.Server.csproj", "{D82E3034-C43D-40F0-A131-17E4F9F12937}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankApp.Client", "BankApp\Client\BankApp.Client.csproj", "{B50C062B-CC9A-4779-A5FB-5C03661EDC30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApp.Client", "BankApp\Client\BankApp.Client.csproj", "{B50C062B-CC9A-4779-A5FB-5C03661EDC30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankApp.Shared", "BankApp\Shared\BankApp.Shared.csproj", "{BF23150D-B14E-4144-AAC7-19C2A86DDDDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankApp.Shared", "BankApp\Shared\BankApp.Shared.csproj", "{BF23150D-B14E-4144-AAC7-19C2A86DDDDF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
