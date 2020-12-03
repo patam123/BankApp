@@ -2,7 +2,7 @@
     <td>@Transaction.TransactionDate.ToShortDateString()</td>
     <td>@Transaction.Name</td>
     <td>
-        <select @onchange="((e) => SetCategory(Transaction, e))">
+        <select class="btn btn-dark" @onchange="((e) => SetCategory(Transaction, e))">
             @foreach (var category in Categories)
             {
                 var selected = category.Name.Equals(Transaction.Category.Name) ? "selected" : null;

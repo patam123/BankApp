@@ -3,14 +3,17 @@
 
 <h3>Kontoinformation</h3>
 
-<DetailedAccountInformationHeader BankAccount="bankAccount" />
+<DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" />
 
 @code{
     private BankAccount bankAccount;
 
+    DateTime fromDate = DateTime.Today.AddMonths(-1);
+    DateTime toDate = DateTime.Today;
+
     protected override void OnInitialized()
     {
-        bankAccount = new BankAccount() { Id = 1 };
+        bankAccount = new BankAccount() { Id = "0123456789" };
     }
 }
 

@@ -6,7 +6,7 @@ namespace BankApp.Shared.Entities
 {
     public class BankAccount
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public List<Transaction> Transactions { get; set; }
         public decimal Amount { get; set; }
     }

@@ -1,15 +1,15 @@
 ﻿<div style="display: flex; justify-content: space-between; align-items: baseline">
-    <p style="font-size: 16px;">Detaljerad information</p><p>@BankAccount.Id</p>
+    <p style="font-size: 16px;">Detaljerad information</p><p>@BankAccount.Id.Substring(0, 5) @BankAccount.Id.Substring(5, 2) @BankAccount.Id.Substring(7, 3)</p>
     <button @onclick="ChangeDisplayInterval" class="btn btn-dark">@buttonText</button>
     <div style="@style">
         <label for="from">Från</label>
-        <input id="from" name="from" type="date" min="2000-01-01" @onchange="((e) => SetFromDate(e))" />
+        <input id="from" name="from" type="date" min="2000-01-01" max="@DateTime.Today.ToShortDateString()" @onchange="((e) => SetFromDate(e))" />
     </div>
     <div style="@style">
         <label for="to">Till</label>
         <input id="to" name="to" type="date" max="@DateTime.Today.ToShortDateString()" @onchange="((e) => SetToDate(e))" />
     </div>
-    <p>Tidsintervall: <div style="display:flex; flex-direction: column; text-align:center;"><span>@fromDate.ToShortDateString()</span> - <span>@toDate.ToShortDateString()</span></div></p>
+    <p>Tidsintervall: <div style="display:flex; flex-direction: column; text-align:center;"><span>@FromDate.ToShortDateString()</span> - <span>@ToDate.ToShortDateString()</span></div></p>
     
 </div>
 
@@ -17,8 +17,10 @@
 
     string buttonText = "Ändra tidsintervall";
     string style = "display: none";
-    DateTime fromDate = DateTime.Today.AddMonths(-1);
-    DateTime toDate = DateTime.Today;
+
+
+    [Parameter] public DateTime FromDate { get; set; }
+    [Parameter] public DateTime ToDate { get; set; }
 
     bool isHidden = true;
 
@@ -28,8 +30,8 @@
         var month = int.Parse(e.Value.ToString().Substring(5, 2));
         var day = int.Parse(e.Value.ToString().Substring(8, 2));
 
-        fromDate = new DateTime(year, month, day);
-        Console.WriteLine(fromDate);
+        FromDate = new DateTime(year, month, day);
+        Console.WriteLine(FromDate);
         //var newFromDate = new DateTime((e.Value);
     }
 
@@ -39,8 +41,8 @@
         var month = int.Parse(e.Value.ToString().Substring(5, 2));
         var day = int.Parse(e.Value.ToString().Substring(8, 2));
 
-        toDate = new DateTime(year, month, day);
-        Console.WriteLine(toDate);
+        ToDate = new DateTime(year, month, day);
+        Console.WriteLine(ToDate);
         //var newFromDate = new DateTime((e.Value);
     }
 
