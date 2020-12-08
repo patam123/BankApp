@@ -1,0 +1,44 @@
+﻿<table class="table">
+    <thead>
+        <tr>
+            <th>Transaktionsdatum</th>
+            <th>Transaktionsnamn</th>
+            <th>Kategori</th>
+            <th>Summa</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = Index * PageSize; i < (GetCategoryTransactions().Count > ((Index + 1) * PageSize) ? ((Index + 1) * PageSize) : GetCategoryTransactions().Count); i++)
+        {
+            if (GetCategoryTransactions()[i].TransactionDate >= FromDate && GetCategoryTransactions()[i].TransactionDate <= ToDate)
+            {
+                <IndividualTransaction Transaction="GetCategoryTransactions()[i]" Categories="Categories" />
+            }
+        }
+    </tbody>
+</table>
+
+
+@code {
+
+    [Parameter] public int Index { get; set; }
+    [Parameter] public int PageSize { get; set; }
+    [Parameter] public DateTime FromDate { get; set; }
+    [Parameter] public DateTime ToDate { get; set; }
+    [Parameter] public List<Transaction> Transactions { get; set; }
+    [Parameter] public Category CurrentCategory { get; set; }
+    [Parameter] public List<Category> Categories { get; set; }
+
+    private List<Transaction> GetCategoryTransactions()
+    {
+        if (CurrentCategory.Name == null)
+        {
+            return Transactions;
+        }
+        else
+        {
+            var categoryTransactions = Transactions.FindAll(x => x.Category.Name.Equals(CurrentCategory.Name));
+            return categoryTransactions;
+        }
+    }
+}

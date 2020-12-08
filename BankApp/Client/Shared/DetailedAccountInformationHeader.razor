@@ -1,5 +1,4 @@
-﻿@inject IModalService modal
-
+﻿
 <div style="display: flex; justify-content: space-between; align-items: baseline">
     <p style="font-size: 16px;">Detaljerad information</p><p>@BankAccount.Id.Substring(0, 5) @BankAccount.Id.Substring(5, 2) @BankAccount.Id.Substring(7, 3)</p>
     <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Sätt tidsintervall</BSButton>

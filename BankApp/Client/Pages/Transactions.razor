@@ -10,30 +10,12 @@
 
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Transaktionsdatum</th>
-                <th>Transaktionsnamn</th>
-                <th>Kategori</th>
-                <th>Summa</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = index * pageSize; i < (transactions.Count > ((index + 1) * pageSize) ? ((index + 1) * pageSize) : transactions.Count); i++)
-            {
-                if (transactions[i].Category.Name.Equals(currentCategory.Name) || currentCategory.Name == null && (transactions[i].TransactionDate >= FromDate && transactions[i].TransactionDate <= ToDate))
-                {
-                    <IndividualTransaction Transaction="transactions[i]" Categories="categories" />
-                }
-            }
-        </tbody>
-    </table>
+    <TransactionBody Categories="categories" CurrentCategory="currentCategory" FromDate="FromDate" ToDate="ToDate" Index="index" PageSize="pageSize" Transactions="transactions" />
 
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index - 1))">Föregående</div></li>
-            @for (int i = 0; i < (transactions.Count / pageSize) + 1; i++)
+            @for (int i = 0; i < (SetPagination() / pageSize) + 1; i++)
             {
                 var n = i;
                 <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(n))">@(i + 1) </div></li>
@@ -129,6 +111,21 @@ else
 
         ToDate = new DateTime(year, month, day);
         Console.WriteLine(ToDate);
+    }
+    private int SetPagination()
+    {
+
+        if (currentCategory.Name == null)
+        {
+            return transactions.Count;
+        }
+        else
+        {
+            var transaction = transactions.FindAll(x => x.Category.Name.Equals(currentCategory.Name));
+            var transactionCount = transaction.Count;
+
+            return transactionCount;
+        }
     }
 
 }
