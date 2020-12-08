@@ -1,66 +1,32 @@
-﻿<div style="display: flex; justify-content: space-between; align-items: baseline">
+﻿@inject IModalService modal
+
+<div style="display: flex; justify-content: space-between; align-items: baseline">
     <p style="font-size: 16px;">Detaljerad information</p><p>@BankAccount.Id.Substring(0, 5) @BankAccount.Id.Substring(5, 2) @BankAccount.Id.Substring(7, 3)</p>
-    <button @onclick="ChangeDisplayInterval" class="btn btn-dark">@buttonText</button>
-    <div style="@style">
-        <label for="from">Från</label>
-        <input id="from" name="from" type="date" min="2000-01-01" max="@DateTime.Today.ToShortDateString()" @onchange="((e) => SetFromDate(e))" />
-    </div>
-    <div style="@style">
-        <label for="to">Till</label>
-        <input id="to" name="to" type="date" max="@DateTime.Today.ToShortDateString()" @onchange="((e) => SetToDate(e))" />
-    </div>
+    <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Sätt tidsintervall</BSButton>
+    <BSModal @ref="DateModal">
+        <BSModalHeader OnClick="@(() => DateModal.Hide())">Ändra tidsintervall</BSModalHeader>
+        <BSModalBody>
+            <DisplayDatesModal SetFromDate="SetFromDate" SetToDate="SetToDate" />
+        </BSModalBody>
+        <BSModalFooter>
+            <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Hide())">Stäng</BSButton>
+        </BSModalFooter>
+    </BSModal>
     <p>Tidsintervall: <div style="display:flex; flex-direction: column; text-align:center;"><span>@FromDate.ToShortDateString()</span> - <span>@ToDate.ToShortDateString()</span></div></p>
     
 </div>
 
 @code {
 
-    string buttonText = "Ändra tidsintervall";
-    string style = "display: none";
+    BSModal DateModal { get; set; }
 
 
     [Parameter] public DateTime FromDate { get; set; }
     [Parameter] public DateTime ToDate { get; set; }
-
-    bool isHidden = true;
-
-    void SetFromDate(ChangeEventArgs e) // consider refactoring, kan plockas ut för att använda till transactions också
-    {
-        var year = int.Parse(e.Value.ToString().Substring(0, 4));
-        var month = int.Parse(e.Value.ToString().Substring(5, 2));
-        var day = int.Parse(e.Value.ToString().Substring(8, 2));
-
-        FromDate = new DateTime(year, month, day);
-        Console.WriteLine(FromDate);
-        //var newFromDate = new DateTime((e.Value);
-    }
-
-    void SetToDate(ChangeEventArgs e)
-    {
-        var year = int.Parse(e.Value.ToString().Substring(0, 4));
-        var month = int.Parse(e.Value.ToString().Substring(5, 2));
-        var day = int.Parse(e.Value.ToString().Substring(8, 2));
-
-        ToDate = new DateTime(year, month, day);
-        Console.WriteLine(ToDate);
-        //var newFromDate = new DateTime((e.Value);
-    }
+    [Parameter] public EventCallback<ChangeEventArgs> SetFromDate { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> SetToDate { get; set; }
 
 
 
-    void ChangeDisplayInterval()
-    {
-        if (isHidden)
-        {
-            style = "display: none";
-            buttonText = "Ändra tidsintervall";
-            isHidden = false;
-        }
-        else
-        {
-            style = "display:flex; flex-direction: column";
-            buttonText = "Dölj";
-            isHidden = true;
-        }
-    }
+
 }
