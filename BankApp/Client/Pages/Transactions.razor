@@ -1,7 +1,7 @@
 ﻿@page "/transactions"
 
 <h3>Transaktioner</h3>
-<TransactionHeader SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" SetCurrentCategoryOnChange="SetCurrentCategoryOnChange" Categories="categories" CurrentCategory="currentCategory" />
+<TransactionHeader SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="categories" CurrentCategory="currentCategory" />
 
 @if (transactions == null)
 {
@@ -15,7 +15,7 @@ else
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index - 1))">Föregående</div></li>
-            @for (int i = 0; i < (SetPagination() / pageSize) + 1; i++)
+            @for (int i = 0; i < (SetPagination() / pageSize) + 1; i++) // kolla vidare på pageSize och hur man kan lösa det bättre
             {
                 var n = i;
                 <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(n))">@(i + 1) </div></li>
@@ -73,17 +73,18 @@ else
 
     public void SetCurrentCategory(string category)
     {
-        currentCategory = categories.Find(x => x.Name.Equals(category));
-        Console.WriteLine(currentCategory);
+        if (category == null)
+        {
+            currentCategory = new Category() { Name = null };
+        }
+        else
+        {
+            currentCategory = categories.Find(x => x.Name.Equals(category));
+            Console.WriteLine(currentCategory);
+        }
     }
 
-    public void SetCurrentCategoryOnChange(ChangeEventArgs e)
-    {
-        currentCategory = categories.Find(x => x.Name.Equals(e.Value));
-        Console.WriteLine(currentCategory.Name);
-    }
-
-    public void SetIndex(int i)
+    public void SetIndex(int i) // bör endast baseras på vilken som är nuvarande kategori.
     {
         if (i >= 0 && i <= (transactions.Count / pageSize))
         {

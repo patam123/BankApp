@@ -4,6 +4,8 @@
     <BSDropdown>
         <BSDropdownToggle Color="Color.Dark">Filtrera</BSDropdownToggle>
         <BSDropdownMenu>
+            <BSDropdownItem OnClick="(() => SetCurrentCategory.InvokeAsync(null))">Visa alla kategorier</BSDropdownItem>
+            <BSDropdownItem  IsDivider="true"/>
             @foreach (var category in Categories)
             {
                 <BSDropdownItem OnClick="(() => SetCurrentCategory.InvokeAsync(category.Name))">@category.Name</BSDropdownItem>
@@ -25,7 +27,6 @@
 
     [Parameter] public List<Category> Categories { get; set; }
     [Parameter] public Category CurrentCategory { get; set; }
-    [Parameter] public EventCallback<ChangeEventArgs> SetCurrentCategoryOnChange { get; set; }
     [Parameter] public EventCallback<string> SetCurrentCategory { get; set; }
 
     [Parameter] public DateTime FromDate { get; set; }
