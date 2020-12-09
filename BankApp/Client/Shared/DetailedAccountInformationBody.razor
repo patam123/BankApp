@@ -1,5 +1,56 @@
-﻿<h3>DetailedAccountInformationBody</h3>
+﻿
+
+<div class="accordion">
+    <BSCollapseGroup>
+        @foreach (var category in Categories)
+        {
+            <BSCollapseItem>
+                <BSCard CardType="CardType.Card">
+                    <BSCard CardType="CardType.Header">
+                        <span class="oi oi-caret-right"></span>
+                        <BSCollapseToggle><div style="display: flex; justify-content: space-between"><span>@category.Name</span><span>@FromDate.ToShortDateString() - @ToDate.ToShortDateString()</span><span>@GetCategorySum(category)</span></div></BSCollapseToggle>
+                    </BSCard>
+                    <BSCollapse>
+                        <BSCard CardType="CardType.Body">
+                            <table class="table">
+                                <tbody>
+                                    @foreach (var transaction in Transactions)
+                                    {
+                                        if (transaction.Category.Name.Equals(category.Name) && transaction.TransactionDate >= FromDate && transaction.TransactionDate <= ToDate)
+                                        {
+                                            <IndividualTransaction Transaction="transaction" Categories="Categories" />
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </BSCard>
+                    </BSCollapse>
+                </BSCard>
+            </BSCollapseItem>
+        }
+    </BSCollapseGroup>
+
+
+</div>
+
 
 @code {
     [Parameter] public List<Category> Categories { get; set; }
+    [Parameter] public List<Transaction> Transactions { get; set; }
+    [Parameter] public DateTime FromDate { get; set; }
+    [Parameter] public DateTime ToDate { get; set; }
+
+
+    private string GetCategorySum(Category category)
+    {
+        var categorySum = Transactions.FindAll(x => x.Category.Name.Equals(category.Name)).Sum(x => x.Amount);
+        if (categorySum == 0)
+        {
+            return "-";
+        }
+        else
+        {
+            return $"{categorySum} kr";
+        }
+    }
 }

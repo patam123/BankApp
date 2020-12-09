@@ -21,6 +21,7 @@ namespace BankApp.Client.Shared
         {
             Category category = Categories.Find(x => x.Name.Equals(e.Value));
             transaction.Category = category;
+            StateHasChanged();
             Console.WriteLine($"{transaction.Name} har lagts till i kategorin \"{category.Name}\"");
             // => skicka till api.
         }

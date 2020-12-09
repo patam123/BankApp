@@ -3,13 +3,37 @@
 
 <h3>Kontoinformation</h3>
 
-<DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" />
+<DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" />
+<DetailedAccountInformationBody FromDate="fromDate" ToDate="toDate" Categories="categories" Transactions="transactions" />
 
 @code{
     private BankAccount bankAccount;
 
     DateTime fromDate = DateTime.Today.AddMonths(-1);
     DateTime toDate = DateTime.Today;
+
+    public List<Category> categories = new List<Category>() // ska laddas in från databas
+{
+        new Category() { Name = "Mat", Color = "red" },
+        new Category() { Name = "Kläder", Color = "pink" },
+        new Category() { Name = "Transport", Color = "brown" },
+        new Category() { Name = "Bostad", Color = "blue" },
+        new Category() { Name = "Uteliv", Color = "yellow" },
+        new Category() { Name = "Fritidsaktivitet", Color = "green" },
+    };
+    public List<Transaction> transactions = new List<Transaction>()
+
+{
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Kläder", Color = "pink"}, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Maxi Partille", new Category { Name = "Mat", Color = "red" }, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m),
+            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m)
+
+        };
 
     protected override void OnInitialized()
     {
