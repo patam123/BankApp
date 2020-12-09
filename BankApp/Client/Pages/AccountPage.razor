@@ -1,12 +1,21 @@
 ﻿@page "/account"
 @using BankApp.Shared.Entities
+@using static BankApp.Client.Shared.MainLayout
 
+<button @onclick="ChangeState">Press Me</button>
 <h3>Kontoinformation</h3>
 
 <DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" />
 <DetailedAccountInformationBody FromDate="fromDate" ToDate="toDate" Categories="categories" Transactions="transactions" />
 
 @code{
+    [CascadingParameter] public MainLayout Appstate { get; set; }
+
+    private void ChangeState()
+    {
+        Appstate.SetIsAuthenticated();
+    }
+
     private BankAccount bankAccount;
 
     DateTime fromDate = DateTime.Today.AddMonths(-1);

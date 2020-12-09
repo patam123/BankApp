@@ -1,0 +1,50 @@
+﻿@page "/register"
+@inject NavigationManager navManager
+
+
+<BSForm Model="registrationModel" OnValidSubmit="(() => OnSubmit())">
+    <BSFormGroup>
+        <BSLabel For="firstname">Förnamn</BSLabel>
+        <BSInput T="string" Id="firstname" InputType="InputType.Text" @bind-Value="registrationModel.FirstName" />
+    </BSFormGroup>
+    <BSFormGroup>
+        <BSLabel For="lastname">Efternamn</BSLabel>
+        <BSInput T="string" Id="lastname" InputType="InputType.Text" @bind-Value="registrationModel.LastName" />
+    </BSFormGroup>
+    <BSFormGroup>
+        <BSLabel For="email">Email</BSLabel>
+        <BSInput T="string" Id="email" InputType="InputType.Email" @bind-Value="registrationModel.Email" />
+    </BSFormGroup>
+    <BSFormGroup>
+        <BSLabel For="password">Lösenord</BSLabel>
+        <BSInput T="string" Id="password" InputType="InputType.Password" @bind-Value="registrationModel.Password" />
+    </BSFormGroup>
+    <BSFormGroup>
+        <BSLabel For="repeatpassword">Upprepa lösenord</BSLabel>
+        <BSInput T="string" Id="repeatpassword" InputType="InputType.Password" @bind-Value="registrationModel.RepeatPassword" />
+    </BSFormGroup>
+    <BSButton ButtonType="ButtonType.Submit">Registrera</BSButton>
+</BSForm>
+
+@code {
+
+    RegistrationModel registrationModel = new RegistrationModel();
+
+    private void OnSubmit()
+    {
+        if (registrationModel.Password.Equals(registrationModel.RepeatPassword))
+        {
+            //skicka resultat till api  =>
+            Console.WriteLine($"{registrationModel.FirstName} {registrationModel.LastName} {registrationModel.Email} {registrationModel.Password} {registrationModel.RepeatPassword}");
+            registrationModel = new RegistrationModel();
+            navManager.NavigateTo("/login");
+        }
+        else
+        {
+            //alerta.
+        }
+
+
+    }
+
+}

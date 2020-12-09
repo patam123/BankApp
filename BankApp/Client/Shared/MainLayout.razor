@@ -1,9 +1,12 @@
 ﻿@inherits LayoutComponentBase
 @inject IBootstrapCss BootstrapCss
 
-<div class="sidebar">
-    <NavMenu />
-</div>
+@if (IsAuthenticated)
+{
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+}
 
 <div class="main">
     <div class="top-row px-4">
@@ -11,11 +14,23 @@
     </div>
 
     <div class="content px-4">
-        @Body
+        <CascadingValue Value="this">
+            @Body
+        </CascadingValue>
     </div>
 </div>
 
 @code{
+
+
+    public bool IsAuthenticated { get; set; }
+    public void SetIsAuthenticated()
+    {
+        IsAuthenticated = !IsAuthenticated;
+        Console.WriteLine(IsAuthenticated);
+        StateHasChanged();
+    }
+
     private bool isServerSide = false;
     protected override async Task OnInitializedAsync()
     {
@@ -30,7 +45,7 @@
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(isServerSide && firstRender)
+        if (isServerSide && firstRender)
         {
             await BootstrapCss.SetBootstrapCss("4.3.1");
         }
