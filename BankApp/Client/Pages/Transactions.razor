@@ -15,7 +15,7 @@ else
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index - 1))">Föregående</div></li>
-            @for (int i = 0; i < (SetPagination() / pageSize) + 1; i++) // kolla vidare på pageSize och hur man kan lösa det bättre
+            @for (int i = 0; i < (GetTransactionCount() / pageSize) + 1; i++)
             {
                 var n = i;
                 <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(n))">@(i + 1) </div></li>
@@ -84,9 +84,21 @@ else
         }
     }
 
+    private int GetTransactionCount()
+    {
+        if (currentCategory.Name == null)
+        {
+            return transactions.Count;
+        }
+        else
+        {
+            return transactions.FindAll(x => x.Category.Name.Equals(currentCategory.Name)).Count;
+        }
+    }
+
     public void SetIndex(int i) // bör endast baseras på vilken som är nuvarande kategori.
     {
-        if (i >= 0 && i <= (transactions.Count / pageSize))
+        if (i >= 0 && i <= (GetTransactionCount() / pageSize))
         {
             Console.WriteLine(i);
             index = i;
@@ -112,21 +124,6 @@ else
 
         ToDate = new DateTime(year, month, day);
         Console.WriteLine(ToDate);
-    }
-    private int SetPagination()
-    {
-
-        if (currentCategory.Name == null)
-        {
-            return transactions.Count;
-        }
-        else
-        {
-            var transaction = transactions.FindAll(x => x.Category.Name.Equals(currentCategory.Name));
-            var transactionCount = transaction.Count;
-
-            return transactionCount;
-        }
     }
 
 }
