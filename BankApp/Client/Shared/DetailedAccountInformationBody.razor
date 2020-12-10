@@ -7,8 +7,9 @@
             <BSCollapseItem>
                 <BSCard CardType="CardType.Card">
                     <BSCard CardType="CardType.Header">
-                        <span class="oi oi-caret-right"></span>
-                        <BSCollapseToggle><div style="display: flex; justify-content: space-between"><span>@category.Name</span><span>@FromDate.ToShortDateString() - @ToDate.ToShortDateString()</span><span>@(category.TransactionSum == 0 ? "-" : category.TransactionSum.ToString() + " kr")</span></div></BSCollapseToggle>
+                        
+                        <BSCollapseToggle><span class="oi oi-caret-right"></span></BSCollapseToggle>
+                        <div style="display: flex; justify-content: space-between"><span>@category.Name</span><span>@FromDate.ToShortDateString() - @ToDate.ToShortDateString()</span><span>@(category.TransactionSum == 0 ? "-" : category.TransactionSum.ToString() + " kr")</span></div>
                     </BSCard>
                     <BSCollapse>
                         <BSCard CardType="CardType.Body">
