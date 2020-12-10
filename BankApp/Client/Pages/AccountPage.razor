@@ -2,6 +2,8 @@
 @using BankApp.Shared.Entities
 @using static BankApp.Client.Shared.MainLayout
 
+@inject AppStateContainer appState
+
 <button @onclick="ChangeState">Press Me</button>
 <h3>Kontoinformation</h3>
 
@@ -9,11 +11,12 @@
 <DetailedAccountInformationBody FromDate="fromDate" ToDate="toDate" Categories="categories" Transactions="transactions" />
 
 @code{
-    [CascadingParameter] public MainLayout Appstate { get; set; }
 
     private void ChangeState()
     {
-        Appstate.SetIsAuthenticated();
+        appState.IsAuth = true;
+        Console.WriteLine(appState.IsAuth);
+        StateHasChanged();
     }
 
     private BankAccount bankAccount;

@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @inject NavigationManager navManager
+@inject AppStateContainer appState
 
 <BSForm Model="loginModel" OnValidSubmit="(() => OnSubmit())">
     <BSFormGroup>
@@ -10,16 +11,21 @@
         <BSLabel For="password">Lösenord</BSLabel>
         <BSInput T="string" Id="password" InputType="InputType.Password" @bind-Value="loginModel.Password" />
     </BSFormGroup>
-    <BSButton ButtonType="ButtonType.Submit">Registrera</BSButton>
+    <BSButton ButtonType="ButtonType.Submit">Logga in</BSButton>
 </BSForm>
+
+<NavLink href="register">Inget konto? Registrera</NavLink>
 
 @code {
 
     LoginModel loginModel = new LoginModel();
-
+    //[CascadingParameter] public MainLayout Appstate { get; set; }
 
     private void OnSubmit()
     {
+        //skicka loginModel till api => få tillbaka response =>
+        //Appstate.SetIsAuthenticated();
+        appState.IsAuth = true;
         navManager.NavigateTo("/account");
     }
 

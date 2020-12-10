@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Blazored.Modal;
 using BlazorStrap;
+using BankApp.Client.Helpers;
 
 namespace BankApp.Client
 {
@@ -29,6 +30,7 @@ namespace BankApp.Client
         {
             services.AddBlazoredModal();
             services.AddBootstrapCss();
+            services.AddSingleton<AppStateContainer>();
         }
     }
 }

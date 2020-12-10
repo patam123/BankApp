@@ -1,7 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject IBootstrapCss BootstrapCss
+@inject AppStateContainer appState
 
-@if (IsAuthenticated)
+@if (appState.IsAuth)
 {
     <div class="sidebar">
         <NavMenu />
