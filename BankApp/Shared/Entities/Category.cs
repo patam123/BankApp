@@ -10,5 +10,6 @@ namespace BankApp.Shared.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public string Color { get; set; }
+        public decimal TransactionSum { get; set; }
     }
 }

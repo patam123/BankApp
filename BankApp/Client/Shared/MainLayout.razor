@@ -51,4 +51,9 @@
             await BootstrapCss.SetBootstrapCss("4.3.1");
         }
     }
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine("state in main has changed");
+        StateHasChanged();
+    }
 }
