@@ -8,8 +8,8 @@
                 <BSCard CardType="CardType.Card">
                     <BSCard CardType="CardType.Header">
                         
-                        <BSCollapseToggle><span class="oi oi-caret-right"></span></BSCollapseToggle>
-                        <div style="display: flex; justify-content: space-between"><span>@category.Name</span><span>@FromDate.ToShortDateString() - @ToDate.ToShortDateString()</span><span>@(category.TransactionSum == 0 ? "-" : category.TransactionSum.ToString() + " kr")</span></div>
+                        <BSCollapseToggle><span class="oi oi-caret-right"></span>@("\t\t\t")<span>@category.Name</span> @*<span>@FromDate.ToShortDateString() - @ToDate.ToShortDateString()</span>*@@("\t\t\t")<span>@(category.TransactionSum == 0 ? "-" : category.TransactionSum.ToString() + " kr")</span></BSCollapseToggle> @*sätta class på collapse-toggle?*@
+                    @*<div style="display: flex; justify-content: space-between"></div>*@
                     </BSCard>
                     <BSCollapse>
                         <BSCard CardType="CardType.Body">

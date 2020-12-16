@@ -1,5 +1,101 @@
-﻿<h3>Categories</h3>
+﻿@page "/categories"
+@inject HttpClient http
+
+<h3>Kategorier</h3>
+
+<div style="display: flex; justify-content:space-between;">
+    <BSCard CardType="CardType.Card">
+        <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Lägg till kategori</BSCard>
+        <BSCard CardType="CardType.Body">
+            <BSForm Model="newCategory" OnSubmit="OnSubmit">
+                <BSFormGroup>
+                    <BSLabel>Namn</BSLabel>
+                    <BSInput @bind-Value="newCategory.Name" placeholder="Namnge kategori..."></BSInput>
+                </BSFormGroup>
+                <BSFormGroup>
+                    <BSLabel>Färg</BSLabel>
+                    <BSInput InputType="InputType.Color" @bind-Value="newCategory.Color"></BSInput>
+                </BSFormGroup>
+                <BSButton ButtonType="ButtonType.Submit">Lägg till</BSButton>
+            </BSForm>
+        </BSCard>
+    </BSCard>
+
+    <BSCard CardType="CardType.Card">
+        <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Befintliga kategorier</BSCard>
+        <BSCard CardType="CardType.Body">
+            @if (categories != null && categories.Count != 0)
+            {
+                @foreach (var category in categories)
+                {
+                    if (category.IsBeingModified)
+                    {
+                        <BSForm IsInline="true" Model="category" OnSubmit="@(() => OnCategorySubmit(category))">
+                            <BSInput InputType="InputType.Text" @bind-Value="category.Name"></BSInput>
+                            <BSInput InputType="InputType.Color" @bind-Value="category.Color"></BSInput>
+                            <BSButton ButtonType="ButtonType.Submit">Spara</BSButton>
+                        </BSForm>
+                    }
+                    else
+                    {
+                        <div style="background: linear-gradient(180deg, @category.Color 0%, rgba(228, 80, 80, 0) 120%); display: flex; justify-content:space-between">
+                            <p>@category.Name</p>
+                            <div>
+                                <BSButton OnClick="(() => SetModificationState(category, true))">Redigera</BSButton>
+                                <BSButton OnClick="(() => RemoveCategory(category.Id))">Ta bort</BSButton> @*öppna modal => ta bort i modal*@
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        </BSCard>
+    </BSCard>
+</div>
 
 @code {
+    Category newCategory = new Category();
+    [CascadingParameter] public MainLayout MainLayout { get; set; }
+    List<Category> categories = new List<Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await http.GetJsonAsync<List<Category>>("api/categories");
+    }
+
+
+    private void SetModificationState(Category category, bool isModifying)
+    {
+        category.IsBeingModified = isModifying;
+    }
+
+    private async Task OnCategorySubmit(Category category)
+    {
+        Console.WriteLine(category.Color);
+        Console.WriteLine(category.Name);
+        category.IsBeingModified = false;
+        // => skicka till api => databas
+        await http.SendJsonAsync(HttpMethod.Put, "api/categories", category);
+
+        StateHasChanged();
+    }
+
+    private async void RemoveCategory(string categoryId)
+    {
+
+        //skicka till api => databas
+        await http.DeleteAsync("api/categories/" + categoryId);
+        categories.RemoveAll(x => x.Id == categoryId);
+        StateHasChanged();
+
+    }
+
+    private async Task OnSubmit()
+    {
+        //skicka till api => databas
+        await http.SendJsonAsync(HttpMethod.Post, "api/categories", newCategory);
+        categories = await http.GetJsonAsync<List<Category>>("api/categories");
+
+        StateHasChanged();
+    }
 
 }

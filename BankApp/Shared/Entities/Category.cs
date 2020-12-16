@@ -2,14 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Cloud.Firestore;
 
 namespace BankApp.Shared.Entities
 {
+    [FirestoreData]
     public class Category
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
+
+        [FirestoreProperty]
         public string Name { get; set; }
+
+        [FirestoreProperty]
         public string Color { get; set; }
+
         public decimal TransactionSum { get; set; }
+        public bool IsBeingModified { get; set; }
     }
 }

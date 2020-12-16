@@ -24,7 +24,7 @@ namespace BankApp.Client.Shared
             transaction.Category = category;
             StateHasChanged();
             SetCatSum.InvokeAsync(e);
-            Console.WriteLine($"{transaction.Name} har lagts till i kategorin \"{category.Name}\"");
+            Console.WriteLine($"{transaction.Description} har lagts till i kategorin \"{category.Name}\"");
             // => skicka till api.
         }
     }

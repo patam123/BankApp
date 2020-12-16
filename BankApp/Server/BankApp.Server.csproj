@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.Modal" Version="5.1.0" />
+    <PackageReference Include="Google.Cloud.Firestore" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="3.2.1" />
   </ItemGroup>
 

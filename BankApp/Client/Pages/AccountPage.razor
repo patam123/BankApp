@@ -4,7 +4,6 @@
 
 @inject AppStateContainer appState
 
-<button @onclick="ChangeState">Press Me</button>
 <h3>Kontoinformation</h3>
 
 <DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" />
@@ -12,12 +11,7 @@
 
 @code{
 
-    private void ChangeState()
-    {
-        appState.IsAuth = true;
-        Console.WriteLine(appState.IsAuth);
-        StateHasChanged();
-    }
+    [CascadingParameter] public MainLayout main { get; set; }
 
     private BankAccount bankAccount;
 
@@ -49,6 +43,7 @@
 
     protected override void OnInitialized()
     {
+        var list = main.BankAccount.Categories;
         bankAccount = new BankAccount() { Id = "0123456789" };
     }
 
@@ -60,7 +55,6 @@
 
         fromDate = new DateTime(year, month, day);
         Console.WriteLine(fromDate);
-        //var newFromDate = new DateTime((e.Value);
     }
 
     public void SetToDate(ChangeEventArgs e)
@@ -71,7 +65,6 @@
 
         toDate = new DateTime(year, month, day);
         Console.WriteLine(toDate);
-        //var newFromDate = new DateTime((e.Value);
     }
 }
 

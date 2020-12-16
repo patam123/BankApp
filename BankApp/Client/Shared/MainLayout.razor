@@ -23,18 +23,21 @@
 
 @code{
 
-
-    public bool IsAuthenticated { get; set; }
-    public void SetIsAuthenticated()
-    {
-        IsAuthenticated = !IsAuthenticated;
-        Console.WriteLine(IsAuthenticated);
-        StateHasChanged();
-    }
+    public BankAccount BankAccount { get; set; } = new BankAccount();
 
     private bool isServerSide = false;
+
     protected override async Task OnInitializedAsync()
     {
+        BankAccount.Categories = new List<Category>()
+{
+        new Category() { Name = "Mat", Color = "red" },
+        new Category() { Name = "Kläder", Color = "pink" },
+        new Category() { Name = "Transport", Color = "brown" },
+        new Category() { Name = "Bostad", Color = "blue" },
+        new Category() { Name = "Uteliv", Color = "yellow" },
+        new Category() { Name = "Fritidsaktivitet", Color = "green" },
+    };
         try
         {
             await BootstrapCss.SetBootstrapCss("4.3.1");
@@ -50,10 +53,5 @@
         {
             await BootstrapCss.SetBootstrapCss("4.3.1");
         }
-    }
-    protected override void OnParametersSet()
-    {
-        Console.WriteLine("state in main has changed");
-        StateHasChanged();
     }
 }
