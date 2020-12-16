@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BankApp.Shared.Entities;
 using Google.Cloud.Firestore;
 using Newtonsoft.Json;
+using Transaction = BankApp.Shared.Entities.Transaction;
 
 namespace BankApp.Server.DataAccess
 {
@@ -21,6 +22,8 @@ namespace BankApp.Server.DataAccess
             projectId = "bankapp-2782c";
             firestore = FirestoreDb.Create(projectId);
         }
+
+        // Category Methods
 
         public async Task<List<Category>> GetAllCategories()
         {
@@ -50,7 +53,7 @@ namespace BankApp.Server.DataAccess
 
                 throw;
             }
-            
+
         }
         public async void AddCategory(Category category)
         {
@@ -81,8 +84,47 @@ namespace BankApp.Server.DataAccess
 
         public async void DeleteCategory(string id)
         {
-            var docRef = firestore.Collection("categories").Document(id);
-            await docRef.DeleteAsync();
+            try
+            {
+                var docRef = firestore.Collection("categories").Document(id);
+                await docRef.DeleteAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
+        // Transaction Methods
+
+        public async Task<List<Transaction>> GetTransactions()
+        {
+            try
+            {
+                var transactionCollectionRef = firestore.Collection("transactions");
+                var transactionSnapshot = await transactionCollectionRef.GetSnapshotAsync();
+                var transactionList = new List<Transaction>();
+                foreach (var documentSnapshot in transactionSnapshot)
+                {
+                    if (documentSnapshot.Exists)
+                    {
+                        var transaction = documentSnapshot.ToDictionary();
+                        var jsonTransaction = JsonConvert.SerializeObject(transaction);
+                        var newTransaction = JsonConvert.DeserializeObject<Transaction>(jsonTransaction);
+                        newTransaction.Id = documentSnapshot.Id;
+                        transactionList.Add(newTransaction);
+                    }
+                }
+                var sortedTransactions = transactionList.OrderBy(x => x.TransactionDate).ToList();
+                return sortedTransactions;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

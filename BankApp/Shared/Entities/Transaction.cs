@@ -21,8 +21,9 @@ namespace BankApp.Shared.Entities
             Amount = Math.Round(amount, 2);
         }
 
+        public string Id { get; set; }
         [FirestoreProperty]
-        public int TransactionId { get; set; }
+        public string TransactionId { get; set; }
         [FirestoreProperty]
         public DateTime TransactionDate { get; set; }
         [FirestoreProperty]
