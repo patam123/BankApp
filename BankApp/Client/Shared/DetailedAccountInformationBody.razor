@@ -17,9 +17,9 @@
                                 <tbody>
                                     @foreach (var transaction in Transactions)
                                     {
-                                        if (transaction.Category.Name.Equals(category.Name) && transaction.TransactionDate >= FromDate && transaction.TransactionDate <= ToDate)
+                                        if (transaction.CategoryId.Equals(category.Id) && transaction.TransactionDate >= FromDate && transaction.TransactionDate <= ToDate)
                                         {
-                                            <IndividualTransaction SetCatSum="SetCategorySums" Transaction="transaction" Categories="Categories" />
+                                            <IndividualTransaction CurrentCategory="category" SetCatSum="SetCategorySums" Transaction="transaction" Categories="Categories" />
                                         }
                                     }
                                 </tbody>
@@ -40,26 +40,7 @@
     [Parameter] public List<Transaction> Transactions { get; set; }
     [Parameter] public DateTime FromDate { get; set; }
     [Parameter] public DateTime ToDate { get; set; }
+    [Parameter] public EventCallback SetCategorySums { get; set; }
 
-    private void SetCategorySums()
-    {
-        foreach (var category in Categories)
-        {
-            category.TransactionSum = 0;
-            category.TransactionSum += Transactions.FindAll(x => x.Category.Name.Equals(category.Name)).Sum(x => x.Amount);
-        }
-    }
-
-    protected override void OnInitialized()
-    {
-        SetCategorySums();
-    }
-    protected override void OnAfterRender(bool firstRender)
-    {
-        SetCategorySums();
-    }
-    protected override bool ShouldRender()
-    {
-        return true;
-    }
+    
 }

@@ -17,6 +17,9 @@ namespace BankApp.Shared.Entities
         [FirestoreProperty]
         public string Color { get; set; }
 
+        [FirestoreProperty]
+        public string OwnerId { get; set; }
+
         public decimal TransactionSum { get; set; }
         public bool IsBeingModified { get; set; }
     }

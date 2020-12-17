@@ -1,4 +1,5 @@
 ﻿using BankApp.Server.DataAccess;
+using BankApp.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -9,17 +10,17 @@ using System.Threading.Tasks;
 
 namespace BankApp.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/transactions")]
     [ApiController]
     public class TransactionController : Controller
     {
 
         Firestore firestore = new Firestore();
-        // GET: api/<TransactionController>
+        // GET: api/transactions
         [HttpGet]
-        public IEnumerable<string> Get()
+        public Task<List<Transaction>> Get()
         {
-            return new string[] { "value1", "value2" };
+            return firestore.GetTransactions();
         }
 
         // GET api/<TransactionController>/5

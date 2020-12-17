@@ -18,9 +18,9 @@ namespace BankApp.Server.Controllers
         Firestore firestore = new Firestore();
         // GET: api/categories
         [HttpGet]
-        public Task<List<Category>> Get()
+        public Task<List<Category>> Get(/*string userId*/)
         {
-            return firestore.GetAllCategories();
+            return firestore.GetAllCategories(/*userId*/);
         }
 
         // POST: api/categories
@@ -38,11 +38,6 @@ namespace BankApp.Server.Controllers
         }
 
         // GET api/categories/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
 
 
         // PUT api/categories/5

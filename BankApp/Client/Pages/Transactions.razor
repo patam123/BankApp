@@ -1,7 +1,9 @@
 ﻿@page "/transactions"
+@inject HttpClient http
+
 
 <h3>Transaktioner</h3>
-<TransactionHeader SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="categories" CurrentCategory="currentCategory" />
+<TransactionHeader FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="categories" CurrentCategory="currentCategory" />
 
 @if (transactions == null)
 {
@@ -10,89 +12,67 @@
 
 else
 {
-    <TransactionBody Categories="categories" CurrentCategory="currentCategory" FromDate="FromDate" ToDate="ToDate" Index="index" PageSize="pageSize" Transactions="transactions" />
+    if (categories != null && categories.Count > 0 && transactions != null && transactions.Count > 0)
+    {
 
-    <nav aria-label="Page navigation example">
-        <ul class="pagination">
-            <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index - 1))">Föregående</div></li>
-            @for (int i = 0; i < (GetTransactionCount() / pageSize) + 1; i++)
-            {
-                var n = i;
-                <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(n))">@(i + 1) </div></li>
+        <TransactionBody Categories="categories" CurrentCategory="currentCategory" FromDate="fromDate" ToDate="toDate" Index="index" PageSize="pageSize" Transactions="transactions" />
 
-            }
-            <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index + 1))">Nästa</div></li>
-        </ul>
-    </nav>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index - 1))">Föregående</div></li>
+                @for (int i = 0; i < (GetTransactionCount() / pageSize) + 1; i++)
+                {
+                    var n = i;
+                    <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(n))">@(i + 1) </div></li>
+
+                }
+                <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index + 1))">Nästa</div></li>
+            </ul>
+        </nav>
+    }
 }
 
 @code {
     int index = 0;
     int pageSize = 5;
 
-    public DateTime FromDate { get; set; } = DateTime.Today.AddMonths(-1);
-    public DateTime ToDate { get; set; } = DateTime.Today;
-    public Category currentCategory = new Category() { Name = null };
-    public List<Transaction> transactions;
-    public List<Category> categories = new List<Category>() // ska laddas in från databas
-{
-        new Category() { Name = "Mat", Color = "red" },
-        new Category() { Name = "Kläder", Color = "pink" },
-        new Category() { Name = "Transport", Color = "brown" },
-        new Category() { Name = "Bostad", Color = "blue" },
-        new Category() { Name = "Uteliv", Color = "yellow" },
-        new Category() { Name = "Fritidsaktivitet", Color = "green" },
-    };
+    DateTime fromDate = DateTime.Today.AddMonths(-1);
+    DateTime toDate = DateTime.Today;
+    public Category currentCategory = new Category() { Id = null };
+    public List<Transaction> transactions = new List<Transaction>();
+    public List<Category> categories = new List<Category>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        transactions = new List<Transaction>()
 
-{
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Kläder", Color = "pink"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Maxi Partille", new Category{ Name = "Mat", Color = "red"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m)
-
-        };
+        categories = await http.GetJsonAsync<List<Category>>("api/categories");
+        transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
+        Console.WriteLine(categories.Count);
+        Console.WriteLine(transactions.Count);
     }
 
-    protected override void OnParametersSet()
+    public void SetCurrentCategory(string categoryId)
     {
-        Console.WriteLine(currentCategory.Name);
-    }
-
-    protected override bool ShouldRender()
-    {
-        return true;
-    }
-
-    public void SetCurrentCategory(string category)
-    {
-        if (category == null)
+        if (categoryId == null)
         {
-            currentCategory = new Category() { Name = null };
+            currentCategory = new Category() { Id = null };
         }
         else
         {
-            currentCategory = categories.Find(x => x.Name.Equals(category));
+            currentCategory = categories.Find(x => x.Id.Equals(categoryId));
             Console.WriteLine(currentCategory);
         }
     }
 
     private int GetTransactionCount()
     {
-        if (currentCategory.Name == null)
+        if (currentCategory.Id == null)
         {
             return transactions.Count;
         }
         else
         {
-            return transactions.FindAll(x => x.Category.Name.Equals(currentCategory.Name)).Count;
+            return transactions.FindAll(x => x.CategoryId.Equals(currentCategory.Id)).Count;
         }
     }
 
@@ -112,8 +92,8 @@ else
         var month = int.Parse(e.Value.ToString().Substring(5, 2));
         var day = int.Parse(e.Value.ToString().Substring(8, 2));
 
-        FromDate = new DateTime(year, month, day);
-        Console.WriteLine(FromDate);
+        fromDate = new DateTime(year, month, day);
+        Console.WriteLine(fromDate);
     }
 
     public void SetToDate(ChangeEventArgs e)
@@ -122,8 +102,8 @@ else
         var month = int.Parse(e.Value.ToString().Substring(5, 2));
         var day = int.Parse(e.Value.ToString().Substring(8, 2));
 
-        ToDate = new DateTime(year, month, day);
-        Console.WriteLine(ToDate);
+        toDate = new DateTime(year, month, day);
+        Console.WriteLine(toDate);
     }
 
 }

@@ -25,7 +25,7 @@ namespace BankApp.Server.DataAccess
 
         // Category Methods
 
-        public async Task<List<Category>> GetAllCategories()
+        public async Task<List<Category>> GetAllCategories(/*string userId*/)
         {
 
             try
@@ -39,12 +39,16 @@ namespace BankApp.Server.DataAccess
                     if (documentSnapshot.Exists)
                     {
                         var category = documentSnapshot.ToDictionary();
-                        string jsonCategory = JsonConvert.SerializeObject(category);
-                        var newCategory = JsonConvert.DeserializeObject<Category>(jsonCategory);
-                        newCategory.Id = documentSnapshot.Id;
-                        categoryList.Add(newCategory);
+                        //if (category.Where(x => x.Key == "OwnerId" && (string)x.Value == userId).Count() > 0)
+                        //{
+                            string jsonCategory = JsonConvert.SerializeObject(category);
+                            var newCategory = JsonConvert.DeserializeObject<Category>(jsonCategory);
+                            newCategory.Id = documentSnapshot.Id;
+                            categoryList.Add(newCategory);
+                        //}
                     }
                 }
+
                 var sortedCategories = categoryList.OrderBy(x => x.Name).ToList();
                 return sortedCategories;
             }
@@ -115,10 +119,11 @@ namespace BankApp.Server.DataAccess
                         var newTransaction = JsonConvert.DeserializeObject<Transaction>(jsonTransaction);
                         newTransaction.Id = documentSnapshot.Id;
                         transactionList.Add(newTransaction);
+
                     }
                 }
                 var sortedTransactions = transactionList.OrderBy(x => x.TransactionDate).ToList();
-                return sortedTransactions;
+                return transactionList;
             }
             catch (Exception)
             {

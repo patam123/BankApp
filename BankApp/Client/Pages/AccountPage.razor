@@ -1,50 +1,35 @@
 ﻿@page "/account"
 @using BankApp.Shared.Entities
-@using static BankApp.Client.Shared.MainLayout
-
+@inject HttpClient http
 @inject AppStateContainer appState
 
 <h3>Kontoinformation</h3>
 
-<DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" />
-<DetailedAccountInformationBody FromDate="fromDate" ToDate="toDate" Categories="categories" Transactions="transactions" />
+@if (categories != null && categories.Count > 0 && transactions != null && transactions.Count > 0)
+{
+    <DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" />
+    <DetailedAccountInformationBody SetCategorySums="SetCategorySums" FromDate="fromDate" ToDate="toDate" Categories="categories" Transactions="transactions" />
+
+}
 
 @code{
 
-    [CascadingParameter] public MainLayout main { get; set; }
 
     private BankAccount bankAccount;
 
     DateTime fromDate = DateTime.Today.AddMonths(-1);
     DateTime toDate = DateTime.Today;
 
-    public List<Category> categories = new List<Category>() // ska laddas in från databas
-{
-        new Category() { Name = "Mat", Color = "red" },
-        new Category() { Name = "Kläder", Color = "pink" },
-        new Category() { Name = "Transport", Color = "brown" },
-        new Category() { Name = "Bostad", Color = "blue" },
-        new Category() { Name = "Uteliv", Color = "yellow" },
-        new Category() { Name = "Fritidsaktivitet", Color = "green" },
-    };
-    public List<Transaction> transactions = new List<Transaction>()
+    public List<Category> categories = new List<Category>();
 
-{
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Mat", Color = "red"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category{ Name = "Kläder", Color = "pink"}, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Maxi Partille", new Category { Name = "Mat", Color = "red" }, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m),
-            new Transaction(new DateTime(2020, 11, 11), "ICA Sannegården", new Category { Name = "Mat", Color = "red" }, 369.726m)
+    public List<Transaction> transactions = new List<Transaction>();
 
-        };
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var list = main.BankAccount.Categories;
+        categories = await http.GetJsonAsync<List<Category>>("api/categories");
+        transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
         bankAccount = new BankAccount() { Id = "0123456789" };
+        SetCategorySums();
     }
 
     public void SetFromDate(ChangeEventArgs e) // consider refactoring, kan plockas ut för att använda till transactions också
@@ -55,6 +40,7 @@
 
         fromDate = new DateTime(year, month, day);
         Console.WriteLine(fromDate);
+        SetCategorySums();
     }
 
     public void SetToDate(ChangeEventArgs e)
@@ -65,6 +51,16 @@
 
         toDate = new DateTime(year, month, day);
         Console.WriteLine(toDate);
+        SetCategorySums();
+    }
+
+    private void SetCategorySums()
+    {
+        foreach (var category in categories)
+        {
+            category.TransactionSum = 0;
+            category.TransactionSum += transactions.FindAll(x => x.CategoryId.Equals(category.Id) && x.TransactionDate >= fromDate && x.TransactionDate <= toDate).Sum(x => x.Amount);
+        }
     }
 }
 

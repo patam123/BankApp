@@ -13,11 +13,11 @@ namespace BankApp.Shared.Entities
         {
 
         }
-        public Transaction(DateTime transactionDate, string name, Category category, decimal amount)
+        public Transaction(DateTime transactionDate, string name, string categoryId, decimal amount)
         {
             TransactionDate = transactionDate;
             Description = name;
-            Category = category;
+            CategoryId = categoryId;
             Amount = Math.Round(amount, 2);
         }
 
@@ -27,9 +27,9 @@ namespace BankApp.Shared.Entities
         [FirestoreProperty]
         public DateTime TransactionDate { get; set; }
         [FirestoreProperty]
-        public string Description { get; set; } // döpa om till description.
+        public string Description { get; set; }
         [FirestoreProperty]
-        public Category Category { get; set; } // byta till string och CategoryId.
+        public string CategoryId { get; set; }
         [FirestoreProperty]
         public decimal Amount { get; set; }
     }

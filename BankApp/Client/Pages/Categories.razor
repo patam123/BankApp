@@ -1,4 +1,5 @@
 ﻿@page "/categories"
+@using System.Diagnostics;
 @inject HttpClient http
 
 <h3>Kategorier</h3>
@@ -59,7 +60,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        categories = await http.GetJsonAsync<List<Category>>("api/categories");
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var userId = "id";
+        categories = await http.GetJsonAsync<List<Category>>("api/categories"/* + userId*/);
+        stopwatch.Stop();
+        Console.WriteLine(stopwatch.ElapsedMilliseconds);
     }
 
 

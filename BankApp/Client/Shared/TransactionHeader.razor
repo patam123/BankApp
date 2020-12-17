@@ -8,7 +8,7 @@
             <BSDropdownItem  IsDivider="true"/>
             @foreach (var category in Categories)
             {
-                <BSDropdownItem OnClick="(() => SetCurrentCategory.InvokeAsync(category.Name))">@category.Name</BSDropdownItem>
+                <BSDropdownItem OnClick="(() => SetCurrentCategory.InvokeAsync(category.Id))">@category.Name</BSDropdownItem>
             }
         </BSDropdownMenu>
     </BSDropdown>

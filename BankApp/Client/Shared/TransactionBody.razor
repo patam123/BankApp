@@ -12,7 +12,7 @@
         {
             if (GetCategoryTransactions()[i].TransactionDate >= FromDate && GetCategoryTransactions()[i].TransactionDate <= ToDate)
             {
-                <IndividualTransaction Transaction="GetCategoryTransactions()[i]" Categories="Categories" />
+                <IndividualTransaction CurrentCategory="CurrentCategory" Transaction="GetCategoryTransactions()[i]" Categories="Categories" />
             }
         }
     </tbody>
@@ -31,13 +31,13 @@
 
     private List<Transaction> GetCategoryTransactions()
     {
-        if (CurrentCategory.Name == null)
+        if (CurrentCategory.Id == null)
         {
             return Transactions;
         }
         else
         {
-            var categoryTransactions = Transactions.FindAll(x => x.Category.Name.Equals(CurrentCategory.Name));
+            var categoryTransactions = Transactions.FindAll(x => x.CategoryId.Equals(CurrentCategory.Id));
             return categoryTransactions;
         }
     }

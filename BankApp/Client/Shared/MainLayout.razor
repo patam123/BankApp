@@ -2,12 +2,12 @@
 @inject IBootstrapCss BootstrapCss
 @inject AppStateContainer appState
 
-@if (appState.IsAuth)
-{
+@*@if (appState.IsAuth)
+{*@
     <div class="sidebar">
         <NavMenu />
     </div>
-}
+    @*//}*@
 
 <div class="main">
     <div class="top-row px-4">
