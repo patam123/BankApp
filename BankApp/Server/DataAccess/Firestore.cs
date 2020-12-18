@@ -131,5 +131,19 @@ namespace BankApp.Server.DataAccess
                 throw;
             }
         }
+
+        public async void UpdateTransaction(Transaction transaction)
+        {
+            try
+            {
+                var docRef = firestore.Collection("transactions").Document(transaction.Id);
+                await docRef.SetAsync(transaction, SetOptions.Overwrite);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

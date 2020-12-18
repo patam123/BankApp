@@ -23,6 +23,12 @@ namespace BankApp.Server.Controllers
             return firestore.GetTransactions();
         }
 
+        [HttpPut]
+        public void Put([FromBody] Transaction transaction)
+        {
+            firestore.UpdateTransaction(transaction);
+        }
+
         // GET api/<TransactionController>/5
         [HttpGet("{id}")]
         public string Get(int id)
