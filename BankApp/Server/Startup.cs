@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -22,7 +24,10 @@ namespace BankApp.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-
+            FirebaseApp.Create(new AppOptions() 
+            { 
+                Credential = GoogleCredential.FromFile(@"C:\Users\patri\Downloads\bankapp-2782c-c3b4e363ce02.json"),
+            });
             services.AddControllersWithViews();
             services.AddRazorPages();
         }

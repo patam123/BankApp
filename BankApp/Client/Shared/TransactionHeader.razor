@@ -35,12 +35,4 @@
     [Parameter] public EventCallback<ChangeEventArgs> SetToDate { get; set; }
 
 
-
-
-
-    protected override void OnParametersSet()
-    {
-        Console.WriteLine(CurrentCategory.Name + "from parameters set in header");
-    }
-
 }

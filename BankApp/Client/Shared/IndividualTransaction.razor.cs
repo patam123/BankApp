@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BankApp.Shared.Entities;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace BankApp.Client.Shared
 {
@@ -17,20 +19,25 @@ namespace BankApp.Client.Shared
         [Parameter] public Transaction Transaction { get; set; }
         [Parameter] public List<Category> Categories { get; set; }
         [Parameter] public EventCallback SetCatSum { get; set; }
-        [Parameter] public Category CurrentCategory { get; set; } // överflödig, ta bort
+
+        [Inject] public HttpClient Http { get; set; }
 
         protected override void OnInitialized()
         {
-            CurrentCategory = Categories.Find(x => x.Id.Equals(Transaction.CategoryId));
-        }
-        public void SetCategory(Transaction transaction, ChangeEventArgs e) // gör private?
-        {
-            Category category = Categories.Find(x => x.Id.Equals(e.Value));
-            Transaction.CategoryId = category.Id;
 
-            SetCatSum.InvokeAsync(e);
-            Console.WriteLine($"{transaction.Description} har lagts till i kategorin \"{category.Name}\"");
+        }
+        public async Task SetCategory(Transaction transaction, ChangeEventArgs e) // gör private?
+        {
+            //UpdateCategory.Invoke(transaction, (string)e.Value);
+            //Category category = Categories.Find(x => x.Id.Equals(e.Value));
+            transaction.CategoryId = (string)e.Value;
+
+
+            await SetCatSum.InvokeAsync(e);
+            //Console.WriteLine($"{transaction.Description} har lagts till i kategorin \"{category.Name}\"");
+            await Http.SendJsonAsync(HttpMethod.Put, "api/transactions", transaction);
             // => skicka till api.
+            StateHasChanged();
         }
     }
 }

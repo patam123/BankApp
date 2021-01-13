@@ -44,12 +44,40 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        try
+        {
+            categories = await http.GetJsonAsync<List<Category>>("api/categories");
+            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
+            Console.WriteLine(categories.Count);
+            Console.WriteLine(transactions.Count);
 
-        categories = await http.GetJsonAsync<List<Category>>("api/categories");
-        transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
-        Console.WriteLine(categories.Count);
-        Console.WriteLine(transactions.Count);
+            foreach (var item in transactions)
+            {
+                Console.WriteLine(item.TransactionDate);
+            }
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+
     }
+
+    //private async void UpdateCategory(Transaction transaction, string categoryId)
+    //{
+    //    //Category category = Categories.Find(x => x.Id.Equals(e.Value));
+    //    //Transaction.CategoryId = (string)e.Value;
+    //    transaction.CategoryId = categoryId;
+    //    //var uasd = JsonConvert.SerializeObject(Transaction);
+    //    //Console.WriteLine(uasd);
+
+    //    //await SetCatSum.InvokeAsync(e);
+    //    //Console.WriteLine($"{transaction.Description} har lagts till i kategorin \"{category.Name}\"");
+    //    await http.SendJsonAsync(HttpMethod.Put, "api/transactions", transaction);
+    //    // => skicka till api.
+    //    StateHasChanged();
+    //}
 
     public void SetCurrentCategory(string categoryId)
     {
@@ -60,7 +88,6 @@ else
         else
         {
             currentCategory = categories.Find(x => x.Id.Equals(categoryId));
-            Console.WriteLine(currentCategory);
         }
     }
 

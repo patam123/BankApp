@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using BankApp.Shared.Entities;
 using Google.Cloud.Firestore;
 using Newtonsoft.Json;
-using Transaction = BankApp.Shared.Entities.Transaction;
 
 namespace BankApp.Server.DataAccess
 {
@@ -41,10 +40,10 @@ namespace BankApp.Server.DataAccess
                         var category = documentSnapshot.ToDictionary();
                         //if (category.Where(x => x.Key == "OwnerId" && (string)x.Value == userId).Count() > 0)
                         //{
-                            string jsonCategory = JsonConvert.SerializeObject(category);
-                            var newCategory = JsonConvert.DeserializeObject<Category>(jsonCategory);
-                            newCategory.Id = documentSnapshot.Id;
-                            categoryList.Add(newCategory);
+                        string jsonCategory = JsonConvert.SerializeObject(category);
+                        var newCategory = JsonConvert.DeserializeObject<Category>(jsonCategory);
+                        newCategory.Id = documentSnapshot.Id;
+                        categoryList.Add(newCategory);
                         //}
                     }
                 }
@@ -103,20 +102,30 @@ namespace BankApp.Server.DataAccess
 
         // Transaction Methods
 
-        public async Task<List<Transaction>> GetTransactions()
+        public async Task<List<Shared.Entities.Transaction>> GetTransactions()
         {
             try
             {
                 var transactionCollectionRef = firestore.Collection("transactions");
                 var transactionSnapshot = await transactionCollectionRef.GetSnapshotAsync();
-                var transactionList = new List<Transaction>();
+                var transactionList = new List<Shared.Entities.Transaction>();
                 foreach (var documentSnapshot in transactionSnapshot)
                 {
                     if (documentSnapshot.Exists)
                     {
                         var transaction = documentSnapshot.ToDictionary();
+                        object dateValue;
+                        transaction.TryGetValue("TransactionDate", out dateValue);
+
+                        int year = int.Parse(dateValue.ToString().Substring(0, 4));
+                        int month = int.Parse(dateValue.ToString().Substring(5, 2));
+                        int day = int.Parse(dateValue.ToString().Substring(8, 2));
+                        DateTime date = new DateTime(year, month, day);
+
+                        transaction.Remove("TransactionDate");
+                        transaction.Add("TransactionDate", date);
                         var jsonTransaction = JsonConvert.SerializeObject(transaction);
-                        var newTransaction = JsonConvert.DeserializeObject<Transaction>(jsonTransaction);
+                        var newTransaction = JsonConvert.DeserializeObject<Shared.Entities.Transaction>(jsonTransaction);
                         newTransaction.Id = documentSnapshot.Id;
                         transactionList.Add(newTransaction);
 
@@ -132,12 +141,13 @@ namespace BankApp.Server.DataAccess
             }
         }
 
-        public async void UpdateTransaction(Transaction transaction)
+        public async void UpdateTransaction(Shared.Entities.Transaction transaction)
         {
             try
             {
                 var docRef = firestore.Collection("transactions").Document(transaction.Id);
-                await docRef.SetAsync(transaction, SetOptions.Overwrite);
+                var dateString = transaction.TransactionDate.Year.ToString() + "-" + (transaction.TransactionDate.Month < 10 ? "0" + transaction.TransactionDate.Month.ToString() : transaction.TransactionDate.Month.ToString()) + "-" + (transaction.TransactionDate.Day < 10 ? "0" + transaction.TransactionDate.Day.ToString() : transaction.TransactionDate.Day.ToString());
+                await docRef.SetAsync(new { TransactionDate = dateString, Amount = transaction.Amount, Description = transaction.Description, CategoryId = transaction.CategoryId, TransactionId = transaction.TransactionId }, SetOptions.Overwrite);
             }
             catch (Exception)
             {

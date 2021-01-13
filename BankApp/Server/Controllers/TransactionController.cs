@@ -12,7 +12,7 @@ namespace BankApp.Server.Controllers
 {
     [Route("api/transactions")]
     [ApiController]
-    public class TransactionController : Controller
+    public class TransactionController : ControllerBase
     {
 
         Firestore firestore = new Firestore();
@@ -27,31 +27,6 @@ namespace BankApp.Server.Controllers
         public void Put([FromBody] Transaction transaction)
         {
             firestore.UpdateTransaction(transaction);
-        }
-
-        // GET api/<TransactionController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/<TransactionController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<TransactionController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<TransactionController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }

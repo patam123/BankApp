@@ -12,7 +12,7 @@ namespace BankApp.Server.Controllers
 {
     [Route("api/categories")]
     [ApiController]
-    public class CategoryController : Controller
+    public class CategoryController : ControllerBase
     {
 
         Firestore firestore = new Firestore();
