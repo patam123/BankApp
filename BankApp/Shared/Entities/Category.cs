@@ -21,6 +21,13 @@ namespace BankApp.Shared.Entities
         public string OwnerId { get; set; }
 
         public double TransactionSum { get; set; }
-        public bool IsBeingModified { get; set; }
+        public bool IsBeingModified { get; private set; }
+
+        public void SetModificationState(bool isModifying)
+        {
+            IsBeingModified = isModifying;
+        }
+
+
     }
 }

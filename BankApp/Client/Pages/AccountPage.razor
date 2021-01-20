@@ -1,21 +1,21 @@
 ﻿@page "/account"
-@using BankApp.Shared.Entities
 @inject HttpClient http
-@inject AppStateContainer appState
+@inject AppStateContainer AppState
+@implements IDisposable
 
 <h3>Kontoinformation</h3>
 
-@if (categories != null && categories.Count > 0 && transactions != null && transactions.Count > 0)
+@if (AppState.Categories != null && AppState.Categories.Count > 0 && AppState.Transactions != null && AppState.Transactions.Count > 0)
 {
     <DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" />
-    <DetailedAccountInformationBody SetCategorySums="SetCategorySums" FromDate="fromDate" ToDate="toDate" Categories="categories" Transactions="transactions" />
+    <DetailedAccountInformationBody SetCategorySums="SetCategorySums" FromDate="fromDate" ToDate="toDate" Categories="AppState.Categories" Transactions="AppState.Transactions" />
 
 }
 
 @code{
 
 
-    private BankAccount bankAccount;
+    private BankAccount bankAccount = new BankAccount() { Id = "9876543210" };
 
     DateTime fromDate = DateTime.Today.AddMonths(-1);
     DateTime toDate = DateTime.Today;
@@ -24,10 +24,9 @@
 
     public List<Transaction> transactions = new List<Transaction>();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        categories = await http.GetJsonAsync<List<Category>>("api/categories");
-        transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
         bankAccount = new BankAccount() { Id = "0123456789" };
         SetCategorySums();
     }
@@ -56,11 +55,24 @@
 
     private void SetCategorySums()
     {
-        foreach (var category in categories)
+        foreach (var category in AppState.Categories)
         {
             category.TransactionSum = 0;
-            category.TransactionSum += transactions.FindAll(x => x.CategoryId.Equals(category.Id) && x.TransactionDate >= fromDate && x.TransactionDate <= toDate).Sum(x => x.Amount);
+            category.TransactionSum += AppState.Transactions.FindAll(x => x.CategoryId.Equals(category.Id) && x.TransactionDate >= fromDate && x.TransactionDate <= toDate).Sum(x => x.Amount);
         }
+    }
+
+    private async Task AppState_StateChanged(ComponentBase source, string property)
+    {
+        if (source != this)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        AppState.StateChanged -= async (source, property) => await AppState_StateChanged(source, property);
     }
 }
 

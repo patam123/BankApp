@@ -1,6 +1,8 @@
-﻿@page "/login"
+﻿@page "/"
 @inject NavigationManager navManager
-@inject AppStateContainer appState
+@inject AppStateContainer AppState
+@inject HttpClient http
+@implements IDisposable
 
 <BSForm Model="loginModel" OnValidSubmit="(() => OnSubmit())">
     <BSFormGroup>
@@ -19,14 +21,66 @@
 @code {
 
     LoginModel loginModel = new LoginModel();
-    //[CascadingParameter] public MainLayout Appstate { get; set; }
+    private List<Transaction> transactions;
+    private List<Category> categories;
 
-    private void OnSubmit()
+    private async Task OnSubmit()
     {
+
+        await GetCategories();
+        await GetTransactions();
         //skicka loginModel till api => få tillbaka response =>
-        //Appstate.SetIsAuthenticated();
-        appState.IsAuth = true;
+        AppState.SetAuthState(this, true);
         navManager.NavigateTo("/account");
+    }
+
+    protected override void OnInitialized()
+    {
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+
+    }
+
+    private async Task GetCategories()
+    {
+        try
+        {
+            categories = await http.GetJsonAsync<List<Category>>("api/categories");
+            AppState.UpdateCategories(this, categories);
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private async Task GetTransactions()
+    {
+        try
+        {
+            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
+            AppState.UpdateTransactions(this, transactions);
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private async Task AppState_StateChanged(ComponentBase source, string property)
+    {
+        if (source != this)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        AppState.StateChanged -= async (source, property) => await AppState_StateChanged(source, property);
     }
 
 }

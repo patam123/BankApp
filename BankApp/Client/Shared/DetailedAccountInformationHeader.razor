@@ -1,7 +1,7 @@
 ﻿
 <div style="display: flex; justify-content: space-between; align-items: baseline">
-    <p style="font-size: 16px;">Detaljerad information</p><p>@BankAccount.Id.Substring(0, 5) @BankAccount.Id.Substring(5, 2) @BankAccount.Id.Substring(7, 3)</p>
-    <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Sätt tidsintervall</BSButton>
+    <p style="font-size: 16px;">Detaljerad information</p><p>Kontonummer: @BankAccount.Id.Substring(0, 5) @BankAccount.Id.Substring(5, 2) @BankAccount.Id.Substring(7, 3)</p>
+    <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Ändra datum</BSButton>
     <BSModal @ref="DateModal">
         <BSModalHeader OnClick="@(() => DateModal.Hide())">Ändra tidsintervall</BSModalHeader>
         <BSModalBody>
@@ -11,7 +11,7 @@
             <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Hide())">Stäng</BSButton>
         </BSModalFooter>
     </BSModal>
-    <p>Tidsintervall: <div style="display:flex; flex-direction: column; text-align:center;"><span>@FromDate.ToShortDateString()</span> - <span>@ToDate.ToShortDateString()</span></div></p>
+    <p>Datum: <div style="display:flex; flex-direction: column; text-align:center;"><span>@FromDate.ToShortDateString()</span> - <span>@ToDate.ToShortDateString()</span></div></p>
     
 </div>
 

@@ -1,13 +1,14 @@
 ﻿@inherits LayoutComponentBase
 @inject IBootstrapCss BootstrapCss
-@inject AppStateContainer appState
+@inject AppStateContainer AppState
+@implements IDisposable
 
-@*@if (appState.IsAuth)
-{*@
+@if (AppState.IsAuth)
+{
     <div class="sidebar">
         <NavMenu />
     </div>
-    @*//}*@
+}
 
 <div class="main">
     <div class="top-row px-4">
@@ -23,21 +24,13 @@
 
 @code{
 
-    public BankAccount BankAccount { get; set; } = new BankAccount();
 
     private bool isServerSide = false;
 
     protected override async Task OnInitializedAsync()
     {
-        BankAccount.Categories = new List<Category>()
-{
-        new Category() { Name = "Mat", Color = "red" },
-        new Category() { Name = "Kläder", Color = "pink" },
-        new Category() { Name = "Transport", Color = "brown" },
-        new Category() { Name = "Bostad", Color = "blue" },
-        new Category() { Name = "Uteliv", Color = "yellow" },
-        new Category() { Name = "Fritidsaktivitet", Color = "green" },
-    };
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+
         try
         {
             await BootstrapCss.SetBootstrapCss("4.3.1");
@@ -53,5 +46,18 @@
         {
             await BootstrapCss.SetBootstrapCss("4.3.1");
         }
+    }
+
+    private async Task AppState_StateChanged(ComponentBase source, string property)
+    {
+        if (source != this)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        AppState.StateChanged -= async (source, property) => await AppState_StateChanged(source, property);
     }
 }

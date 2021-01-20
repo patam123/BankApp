@@ -1,51 +1,38 @@
-﻿@inject AppStateContainer appState
+﻿@inject AppStateContainer AppState
+@implements IDisposable
 
-<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">BankApp</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
+    <div class="top-row pl-4 navbar navbar-dark">
+        <a class="navbar-brand" href="">BankApp</a>
+        <button class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="account">
-                <span class="oi oi-info" aria-hidden="true"></span> Kontoinformation
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="transactions">
-                <span class="oi oi-transfer" aria-hidden="true"></span> Transaktioner
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="categories">
-                <span class="oi oi-pie-chart" aria-hidden="true"></span> Kategorier
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="login" @onclick="Logout">
-                <span class="oi oi-account-logout" aria-hidden="true"></span> Logga ut
-            </NavLink>
-        </li>
-    </ul>
-</div>
+    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+        <ul class="nav flex-column">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="account">
+                    <span class="oi oi-info" aria-hidden="true"></span> Kontoinformation
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="transactions">
+                    <span class="oi oi-transfer" aria-hidden="true"></span> Transaktioner
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="categories">
+                    <span class="oi oi-pie-chart" aria-hidden="true"></span> Kategorier
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="Logout">
+                    <span class="oi oi-account-logout" aria-hidden="true"></span> Logga ut
+                </NavLink>
+            </li>
+        </ul>
+    </div>
+
 
 @code {
     private bool collapseNavMenu = true;
@@ -58,6 +45,25 @@
     }
     private void Logout()
     {
-        appState.IsAuth = false;
+        AppState.SetAuthState(this, false);
+    }
+
+    protected override void OnInitialized()
+    {
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+
+    }
+
+    private async Task AppState_StateChanged(ComponentBase source, string property)
+    {
+        if (source != this)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        AppState.StateChanged -= async (source, property) => await AppState_StateChanged(source, property);
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BankApp.Shared.Entities;
 using System.Net.Http;
 using Newtonsoft.Json;
+using BankApp.Client.Helpers;
 
 namespace BankApp.Client.Shared
 {
@@ -21,7 +22,6 @@ namespace BankApp.Client.Shared
         [Parameter] public EventCallback SetCatSum { get; set; }
 
         [Inject] public HttpClient Http { get; set; }
-
         protected override void OnInitialized()
         {
 

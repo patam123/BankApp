@@ -1,6 +1,7 @@
 ﻿@page "/categories"
-@using System.Diagnostics;
 @inject HttpClient http
+@inject AppStateContainer AppState
+@implements IDisposable
 
 <h3>Kategorier</h3>
 
@@ -8,7 +9,7 @@
     <BSCard CardType="CardType.Card">
         <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Lägg till kategori</BSCard>
         <BSCard CardType="CardType.Body">
-            <BSForm Model="newCategory" OnSubmit="OnSubmit">
+            <BSForm Model="newCategory" OnSubmit="CreateCategory">
                 <BSFormGroup>
                     <BSLabel>Namn</BSLabel>
                     <BSInput @bind-Value="newCategory.Name" placeholder="Namnge kategori..."></BSInput>
@@ -25,13 +26,13 @@
     <BSCard CardType="CardType.Card">
         <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Befintliga kategorier</BSCard>
         <BSCard CardType="CardType.Body">
-            @if (categories != null && categories.Count != 0)
+            @if (AppState.Categories != null && AppState.Categories.Count != 0)
             {
-                @foreach (var category in categories)
+                @foreach (var category in AppState.Categories)
                 {
                     if (category.IsBeingModified)
                     {
-                        <BSForm IsInline="true" Model="category" OnSubmit="@(() => OnCategorySubmit(category))">
+                        <BSForm IsInline="true" Model="category" OnSubmit="@(() => UpdateCategory(category))">
                             <BSInput InputType="InputType.Text" @bind-Value="category.Name"></BSInput>
                             <BSInput InputType="InputType.Color" @bind-Value="category.Color"></BSInput>
                             <BSButton ButtonType="ButtonType.Submit">Spara</BSButton>
@@ -42,7 +43,7 @@
                         <div style="background: linear-gradient(180deg, @category.Color 0%, rgba(228, 80, 80, 0) 120%); display: flex; justify-content:space-between">
                             <p>@category.Name</p>
                             <div>
-                                <BSButton OnClick="(() => SetModificationState(category, true))">Redigera</BSButton>
+                                <BSButton OnClick="(() => category.SetModificationState(true))">Redigera</BSButton>
                                 <BSButton OnClick="(() => RemoveCategory(category.Id))">Ta bort</BSButton> @*öppna modal => ta bort i modal*@
                             </div>
                         </div>
@@ -55,34 +56,28 @@
 
 @code {
     Category newCategory = new Category();
-    [CascadingParameter] public MainLayout MainLayout { get; set; }
+    //[CascadingParameter] public MainLayout MainLayout { get; set; }
     List<Category> categories = new List<Category>();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+
         var userId = "id";
+    }
+
+    private async Task GetCategories()
+    {
         categories = await http.GetJsonAsync<List<Category>>("api/categories"/* + userId*/);
-        stopwatch.Stop();
-        Console.WriteLine(stopwatch.ElapsedMilliseconds);
+        AppState.UpdateCategories(this, categories);
     }
 
-
-    private void SetModificationState(Category category, bool isModifying)
+    private async Task UpdateCategory(Category category)
     {
-        category.IsBeingModified = isModifying;
-    }
-
-    private async Task OnCategorySubmit(Category category)
-    {
-        Console.WriteLine(category.Color);
-        Console.WriteLine(category.Name);
-        category.IsBeingModified = false;
+        category.SetModificationState(false);
         // => skicka till api => databas
         await http.SendJsonAsync(HttpMethod.Put, "api/categories", category);
 
-        StateHasChanged();
     }
 
     private async void RemoveCategory(string categoryId)
@@ -91,17 +86,31 @@
         //skicka till api => databas
         await http.DeleteAsync("api/categories/" + categoryId);
         categories.RemoveAll(x => x.Id == categoryId);
+        AppState.UpdateCategories(this, categories);
         StateHasChanged();
 
     }
 
-    private async Task OnSubmit()
+    private async Task CreateCategory()
     {
         //skicka till api => databas
         await http.SendJsonAsync(HttpMethod.Post, "api/categories", newCategory);
-        categories = await http.GetJsonAsync<List<Category>>("api/categories");
+        newCategory = new Category();
+        await GetCategories();
 
-        StateHasChanged();
+    }
+
+    private async Task AppState_StateChanged(ComponentBase source, string property)
+    {
+        if (source != this)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        AppState.StateChanged -= async (source, property) => await AppState_StateChanged(source, property);
     }
 
 }

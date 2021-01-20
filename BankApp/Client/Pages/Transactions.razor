@@ -1,21 +1,27 @@
 ﻿@page "/transactions"
 @inject HttpClient http
+@inject AppStateContainer AppState
+@implements IDisposable
 
+
+@if(AppState.Categories != null && AppState.Categories.Count > 0)
+{
 
 <h3>Transaktioner</h3>
-<TransactionHeader FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="categories" CurrentCategory="currentCategory" />
+<TransactionHeader FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="AppState.Categories" CurrentCategory="currentCategory" />
+}
 
-@if (transactions == null)
+@if (AppState.Transactions == null && AppState.Categories == null)
 {
     <p><em>Loading...</em></p>
 }
 
 else
 {
-    if (categories != null && categories.Count > 0 && transactions != null && transactions.Count > 0)
+    if (AppState.Categories != null && AppState.Categories.Count > 0 && AppState.Transactions != null && AppState.Transactions.Count > 0)
     {
 
-        <TransactionBody Categories="categories" CurrentCategory="currentCategory" FromDate="fromDate" ToDate="toDate" Index="index" PageSize="pageSize" Transactions="transactions" />
+        <TransactionBody Categories="AppState.Categories" CurrentCategory="currentCategory" FromDate="fromDate" ToDate="toDate" Index="index" PageSize="pageSize" Transactions="AppState.Transactions" />
 
         <nav aria-label="Page navigation example">
             <ul class="pagination">
@@ -42,42 +48,41 @@ else
     public List<Transaction> transactions = new List<Transaction>();
     public List<Category> categories = new List<Category>();
 
-    protected override async Task OnInitializedAsync()
+
+    protected override void OnInitialized()
+    {
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+    }
+
+    private async Task GetCategories()
     {
         try
         {
             categories = await http.GetJsonAsync<List<Category>>("api/categories");
-            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
-            Console.WriteLine(categories.Count);
-            Console.WriteLine(transactions.Count);
+            AppState.UpdateCategories(this, categories);
 
-            foreach (var item in transactions)
-            {
-                Console.WriteLine(item.TransactionDate);
-            }
         }
         catch (Exception)
         {
 
             throw;
         }
-
     }
 
-    //private async void UpdateCategory(Transaction transaction, string categoryId)
-    //{
-    //    //Category category = Categories.Find(x => x.Id.Equals(e.Value));
-    //    //Transaction.CategoryId = (string)e.Value;
-    //    transaction.CategoryId = categoryId;
-    //    //var uasd = JsonConvert.SerializeObject(Transaction);
-    //    //Console.WriteLine(uasd);
+    private async Task GetTransactions()
+    {
+        try
+        {
+            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
+            AppState.UpdateTransactions(this, transactions);
 
-    //    //await SetCatSum.InvokeAsync(e);
-    //    //Console.WriteLine($"{transaction.Description} har lagts till i kategorin \"{category.Name}\"");
-    //    await http.SendJsonAsync(HttpMethod.Put, "api/transactions", transaction);
-    //    // => skicka till api.
-    //    StateHasChanged();
-    //}
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
 
     public void SetCurrentCategory(string categoryId)
     {
@@ -87,7 +92,7 @@ else
         }
         else
         {
-            currentCategory = categories.Find(x => x.Id.Equals(categoryId));
+            currentCategory = AppState.Categories.Find(x => x.Id.Equals(categoryId));
         }
     }
 
@@ -95,11 +100,11 @@ else
     {
         if (currentCategory.Id == null)
         {
-            return transactions.Count;
+            return AppState.Transactions.Count;
         }
         else
         {
-            return transactions.FindAll(x => x.CategoryId.Equals(currentCategory.Id)).Count;
+            return AppState.Transactions.FindAll(x => x.CategoryId.Equals(currentCategory.Id)).Count;
         }
     }
 
@@ -131,6 +136,19 @@ else
 
         toDate = new DateTime(year, month, day);
         Console.WriteLine(toDate);
+    }
+
+    private async Task AppState_StateChanged(ComponentBase source, string property)
+    {
+        if (source != this)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        AppState.StateChanged -= async (source, property) => await AppState_StateChanged(source, property);
     }
 
 }
