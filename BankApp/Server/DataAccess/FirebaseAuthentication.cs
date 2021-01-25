@@ -17,18 +17,27 @@ namespace BankApp.Server.DataAccess
         public int MyProperty { get; set; }
         public async Task<string> CreateUser(User user)
         {
-            UserRecordArgs args = new UserRecordArgs()
+            try
             {
-                Email = user.Email,
-                Password = user.Password,
-                EmailVerified = false,
-                DisplayName = user.FirstName + " " + user.LastName,
+                UserRecordArgs args = new UserRecordArgs()
+                {
+                    Email = user.Email,
+                    Password = user.Password,
+                    EmailVerified = false,
+                    DisplayName = user.FirstName + " " + user.LastName,
 
-            };
+                };
 
-            UserRecord userRecord = await FirebaseAuth.DefaultInstance.CreateUserAsync(args);
-            Console.WriteLine(userRecord.Uid);
-            return userRecord.Uid;
+                UserRecord userRecord = await FirebaseAuth.DefaultInstance.CreateUserAsync(args);
+                Console.WriteLine(userRecord.Uid);
+                return userRecord.Uid;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
         }
 
         public async Task<UserResponse> LogIn(User user)

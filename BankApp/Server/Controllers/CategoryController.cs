@@ -16,7 +16,7 @@ namespace BankApp.Server.Controllers
     {
 
         Firestore firestore = new Firestore();
-        // GET: api/categories
+        // GET: api/categories/{id}
         [HttpGet("{id}")]
         public Task<List<Category>> Get(string id)
         {
@@ -37,14 +37,6 @@ namespace BankApp.Server.Controllers
             firestore.UpdateCategory(category);
         }
 
-        // GET api/categories/5
-
-
-        // PUT api/categories/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
 
         // DELETE api/categories/5
         [HttpDelete("{id}")]

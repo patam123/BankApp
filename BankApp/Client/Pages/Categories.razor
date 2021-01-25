@@ -68,7 +68,7 @@
 
     private async Task GetCategories()
     {
-        categories = await http.GetJsonAsync<List<Category>>("api/categories"/* + userId*/);
+        categories = await http.GetJsonAsync<List<Category>>($"api/categories/{AppState.User.Id}");
         AppState.UpdateCategories(this, categories);
     }
 
@@ -93,6 +93,7 @@
 
     private async Task CreateCategory()
     {
+        newCategory.OwnerId = AppState.User.Id;
         //skicka till api => databas
         await http.SendJsonAsync(HttpMethod.Post, "api/categories", newCategory);
         newCategory = new Category();

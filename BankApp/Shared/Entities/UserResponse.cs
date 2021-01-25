@@ -11,5 +11,6 @@ namespace BankApp.Shared.Entities
         [JsonProperty(PropertyName = "localId")]
         public string UserId { get; set; }
         public string ErrorMessage { get; set; }
+        public string DisplayName { get; set; }
     }
 }

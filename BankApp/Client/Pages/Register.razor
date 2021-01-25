@@ -40,6 +40,19 @@
         if (registrationModel.Password.Equals(registrationModel.RepeatPassword))
         {
             //skicka resultat till api  =>
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(registrationModel.FirstName.Substring(0, 1).ToUpper());
+            var firstName = sb.Append(registrationModel.FirstName.Substring(1).ToLower());
+            registrationModel.FirstName = firstName.ToString();
+            sb.Clear();
+
+            sb.Append(registrationModel.LastName.Substring(0, 1).ToUpper());
+            var lastName = sb.Append(registrationModel.LastName.Substring(1).ToLower());
+            registrationModel.LastName = lastName.ToString();
+            sb.Clear();
+
+
             Console.WriteLine($"{registrationModel.FirstName} {registrationModel.LastName} {registrationModel.Email} {registrationModel.Password} {registrationModel.RepeatPassword}");
             User user = new User()
             {
@@ -69,9 +82,7 @@
         var stringContent = new StringContent(datajson, Encoding.UTF8, "application/json");
         var response = await http.PostAsync("/user/register", stringContent);
         var responseContent = await response.Content.ReadAsStringAsync();
-        Console.WriteLine(responseContent);
         return responseContent;
-        //return await http.SendJsonAsync<string>(HttpMethod.Post, "/user/register", user);
     }
 
 }

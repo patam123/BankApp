@@ -45,7 +45,7 @@
     }
     private void Logout()
     {
-        AppState.SetAuthState(this, false);
+        AppState.SetAuthState(this, AppState.User, false);
     }
 
     protected override void OnInitialized()

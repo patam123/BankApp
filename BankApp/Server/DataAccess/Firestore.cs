@@ -160,5 +160,84 @@ namespace BankApp.Server.DataAccess
                 throw;
             }
         }
+
+        // Expense Limit Methods
+
+        public async Task<List<ExpenseLimit>> GetExpenseLimits(string userId)
+        {
+            try
+            {
+                var expenseRef = firestore.Collection("expenseLimits");
+                var expenseSnapshot = await expenseRef.GetSnapshotAsync();
+                var expenseList = new List<ExpenseLimit>();
+
+                foreach (var documentSnapshot in expenseSnapshot)
+                {
+                    if (documentSnapshot.Exists)
+                    {
+                        var expenseLimit = documentSnapshot.ToDictionary();
+                        if (expenseLimit.Where(x => x.Key == "OwnerId" && (string)x.Value == userId).Count() > 0)
+                        {
+                            string jsonExpenseLimit = JsonConvert.SerializeObject(expenseLimit);
+                            var newExpenseLimit = JsonConvert.DeserializeObject<ExpenseLimit>(jsonExpenseLimit);
+                            newExpenseLimit.Id = documentSnapshot.Id;
+                            expenseList.Add(newExpenseLimit);
+                        }
+                    }
+                }
+
+                return expenseList;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+        }
+
+        public async void AddExpenseLimit(ExpenseLimit expenseLimit)
+        {
+            try
+            {
+                var catRef = firestore.Collection("expenseLimits");
+                await catRef.AddAsync(expenseLimit);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async void UpdateExpenseLimit(ExpenseLimit expenseLimit)
+        {
+            try
+            {
+                var docRef = firestore.Collection("expenseLimits").Document(expenseLimit.Id);
+                await docRef.SetAsync(expenseLimit, SetOptions.Overwrite);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
+        public async void DeleteExpenseLimit(string id)
+        {
+            try
+            {
+                var docRef = firestore.Collection("expenseLimits").Document(id);
+                await docRef.DeleteAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
     }
 }

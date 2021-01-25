@@ -11,6 +11,8 @@ namespace BankApp.Client.Helpers
     {
         public bool IsAuth { get; private set; }
 
+        public User User { get; set; }
+
         public List<Transaction> Transactions { get; private set; }
         public List<Category> Categories { get; private set; }
 
@@ -27,9 +29,10 @@ namespace BankApp.Client.Helpers
             NotifyStateChanged(source, "transactions");
         }
 
-        public void SetAuthState(ComponentBase source, bool isAuthenticated)
+        public void SetAuthState(ComponentBase source, User user, bool isAuthenticated)
         {
             IsAuth = isAuthenticated;
+            User = user;
             NotifyStateChanged(source, "auth");
         }
 

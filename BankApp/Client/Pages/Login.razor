@@ -50,12 +50,15 @@
 
             await GetTransactions(userResp.UserId);
             //skicka loginModel till api => få tillbaka response =>
-            AppState.SetAuthState(this, true);
+            User loggedInUser = new User();
+            loggedInUser.Id = userResp.UserId;
+            loggedInUser.DisplayName = userResp.DisplayName;
+            AppState.SetAuthState(this, loggedInUser, true);
             navManager.NavigateTo("/account");
         }
         else
         {
-            Console.WriteLine("Användarnamn eller lösenord felaktigt");
+            Console.WriteLine("Användarnamn eller lösenord felaktigt"); // flytta till fbauth.
             Console.WriteLine(userResp.ErrorMessage);
         }
     }
