@@ -3,6 +3,8 @@
 @inject AppStateContainer AppState
 @inject HttpClient http
 @implements IDisposable
+@using System.Text
+@using System.Text.Json
 
 <BSForm Model="loginModel" OnValidSubmit="(() => OnSubmit())">
     <BSFormGroup>
@@ -26,12 +28,36 @@
 
     private async Task OnSubmit()
     {
+        User user = new User()
+        {
+            Email = loginModel.Email,
+            Password = loginModel.Password,
 
-        await GetCategories();
-        await GetTransactions();
-        //skicka loginModel till api => få tillbaka response =>
-        AppState.SetAuthState(this, true);
-        navManager.NavigateTo("/account");
+        };
+
+        var userResp = await LoginRequest(user);
+        Console.WriteLine(userResp.UserId);
+
+        //var datajson = JsonSerializer.Serialize(user);
+        //var content = new StringContent(datajson, Encoding.UTF8, "application/json");
+        //var hello = await http.PostAsync("/user/login", content);
+        //var helloString = await hello.Content.ReadAsStringAsync();
+
+        //Console.WriteLine(hello.IsSuccessStatusCode.ToString());
+        if (userResp.UserId != null)
+        {
+            await GetCategories(userResp.UserId);
+
+            await GetTransactions(userResp.UserId);
+            //skicka loginModel till api => få tillbaka response =>
+            AppState.SetAuthState(this, true);
+            navManager.NavigateTo("/account");
+        }
+        else
+        {
+            Console.WriteLine("Användarnamn eller lösenord felaktigt");
+            Console.WriteLine(userResp.ErrorMessage);
+        }
     }
 
     protected override void OnInitialized()
@@ -40,11 +66,17 @@
 
     }
 
-    private async Task GetCategories()
+    private async Task<UserResponse> LoginRequest(User user)
+    {
+        var userResp = await http.SendJsonAsync<UserResponse>(HttpMethod.Post, "/user/login", user);
+        return userResp;
+    }
+
+    private async Task GetCategories(string userId)
     {
         try
         {
-            categories = await http.GetJsonAsync<List<Category>>("api/categories");
+            categories = await http.GetJsonAsync<List<Category>>("api/categories/" + userId);
             AppState.UpdateCategories(this, categories);
 
         }
@@ -55,11 +87,11 @@
         }
     }
 
-    private async Task GetTransactions()
+    private async Task GetTransactions(string userId)
     {
         try
         {
-            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
+            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + userId);
             AppState.UpdateTransactions(this, transactions);
 
         }

@@ -24,7 +24,7 @@ namespace BankApp.Server.DataAccess
 
         // Category Methods
 
-        public async Task<List<Category>> GetAllCategories(/*string userId*/)
+        public async Task<List<Category>> GetAllCategories(string userId)
         {
 
             try
@@ -38,13 +38,14 @@ namespace BankApp.Server.DataAccess
                     if (documentSnapshot.Exists)
                     {
                         var category = documentSnapshot.ToDictionary();
-                        //if (category.Where(x => x.Key == "OwnerId" && (string)x.Value == userId).Count() > 0)
-                        //{
-                        string jsonCategory = JsonConvert.SerializeObject(category);
-                        var newCategory = JsonConvert.DeserializeObject<Category>(jsonCategory);
-                        newCategory.Id = documentSnapshot.Id;
-                        categoryList.Add(newCategory);
-                        //}
+                        if (category.Where(x => x.Key == "OwnerId" && (string)x.Value == userId).Count() > 0)
+                        {
+
+                            string jsonCategory = JsonConvert.SerializeObject(category);
+                            var newCategory = JsonConvert.DeserializeObject<Category>(jsonCategory);
+                            newCategory.Id = documentSnapshot.Id;
+                            categoryList.Add(newCategory);
+                        }
                     }
                 }
 
@@ -102,7 +103,7 @@ namespace BankApp.Server.DataAccess
 
         // Transaction Methods
 
-        public async Task<List<Shared.Entities.Transaction>> GetTransactions()
+        public async Task<List<Shared.Entities.Transaction>> GetTransactions(string userId)
         {
             try
             {
@@ -114,20 +115,24 @@ namespace BankApp.Server.DataAccess
                     if (documentSnapshot.Exists)
                     {
                         var transaction = documentSnapshot.ToDictionary();
-                        object dateValue;
-                        transaction.TryGetValue("TransactionDate", out dateValue);
+                        if (transaction.Where(x => x.Key == "OwnerId" && (string)x.Value == userId).Count() > 0)
+                        {
 
-                        int year = int.Parse(dateValue.ToString().Substring(0, 4));
-                        int month = int.Parse(dateValue.ToString().Substring(5, 2));
-                        int day = int.Parse(dateValue.ToString().Substring(8, 2));
-                        DateTime date = new DateTime(year, month, day);
+                            object dateValue;
+                            transaction.TryGetValue("TransactionDate", out dateValue);
 
-                        transaction.Remove("TransactionDate");
-                        transaction.Add("TransactionDate", date);
-                        var jsonTransaction = JsonConvert.SerializeObject(transaction);
-                        var newTransaction = JsonConvert.DeserializeObject<Shared.Entities.Transaction>(jsonTransaction);
-                        newTransaction.Id = documentSnapshot.Id;
-                        transactionList.Add(newTransaction);
+                            int year = int.Parse(dateValue.ToString().Substring(0, 4));
+                            int month = int.Parse(dateValue.ToString().Substring(5, 2));
+                            int day = int.Parse(dateValue.ToString().Substring(8, 2));
+                            DateTime date = new DateTime(year, month, day);
+
+                            transaction.Remove("TransactionDate");
+                            transaction.Add("TransactionDate", date);
+                            var jsonTransaction = JsonConvert.SerializeObject(transaction);
+                            var newTransaction = JsonConvert.DeserializeObject<Shared.Entities.Transaction>(jsonTransaction);
+                            newTransaction.Id = documentSnapshot.Id;
+                            transactionList.Add(newTransaction);
+                        }
 
                     }
                 }

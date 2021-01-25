@@ -17,10 +17,10 @@ namespace BankApp.Server.Controllers
 
         Firestore firestore = new Firestore();
         // GET: api/categories
-        [HttpGet]
-        public Task<List<Category>> Get(/*string userId*/)
+        [HttpGet("{id}")]
+        public Task<List<Category>> Get(string id)
         {
-            return firestore.GetAllCategories(/*userId*/);
+            return firestore.GetAllCategories(id);
         }
 
         // POST: api/categories
