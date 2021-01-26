@@ -15,7 +15,7 @@
         <BSLabel For="password">Lösenord</BSLabel>
         <BSInput T="string" Id="password" InputType="InputType.Password" @bind-Value="loginModel.Password" />
     </BSFormGroup>
-    <BSButton ButtonType="ButtonType.Submit">Logga in</BSButton>
+    <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Logga in</BSButton>
 </BSForm>
 
 <NavLink href="register">Inget konto? Registrera</NavLink>
@@ -49,6 +49,7 @@
             await GetCategories(userResp.UserId);
 
             await GetTransactions(userResp.UserId);
+            await GetExpenseLimits(userResp.UserId);
             //skicka loginModel till api => få tillbaka response =>
             User loggedInUser = new User();
             loggedInUser.Id = userResp.UserId;
@@ -97,6 +98,20 @@
             transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + userId);
             AppState.UpdateTransactions(this, transactions);
 
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private async Task GetExpenseLimits(string userId)
+    {
+        try
+        {
+            var expenseLimits = await http.GetJsonAsync<List<ExpenseLimit>>("api/expenselimits/" + userId);
+            AppState.UpdateExpenseLimits(this, expenseLimits);
         }
         catch (Exception)
         {

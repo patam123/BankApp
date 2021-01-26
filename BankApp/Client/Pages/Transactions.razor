@@ -1,14 +1,15 @@
 ﻿@page "/transactions"
 @inject HttpClient http
 @inject AppStateContainer AppState
+@inject NavigationManager navManager
 @implements IDisposable
 
 
-@if(AppState.Categories != null && AppState.Categories.Count > 0)
+@if (AppState.Categories != null && AppState.Categories.Count > 0)
 {
 
-<h3>Transaktioner</h3>
-<TransactionHeader FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="AppState.Categories" CurrentCategory="currentCategory" />
+    <h3>Transaktioner</h3>
+    <TransactionHeader FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="AppState.Categories" CurrentCategory="currentCategory" />
 }
 
 @if (AppState.Transactions == null && AppState.Categories == null)
@@ -51,7 +52,14 @@ else
 
     protected override void OnInitialized()
     {
-        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+        if (!AppState.IsAuth)
+        {
+            navManager.NavigateTo("/");
+        }
+        else
+        {
+            AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+        }
     }
 
     private async Task GetCategories()

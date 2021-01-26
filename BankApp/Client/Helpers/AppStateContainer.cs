@@ -15,6 +15,7 @@ namespace BankApp.Client.Helpers
 
         public List<Transaction> Transactions { get; private set; }
         public List<Category> Categories { get; private set; }
+        public List<ExpenseLimit> ExpenseLimits { get; set; }
 
         public void UpdateCategories(ComponentBase source, List<Category> categories)
         {
@@ -27,6 +28,12 @@ namespace BankApp.Client.Helpers
         {
             Transactions = transactions;
             NotifyStateChanged(source, "transactions");
+        }
+
+        public void UpdateExpenseLimits(ComponentBase source, List<ExpenseLimit> expenseLimits)
+        {
+            ExpenseLimits = expenseLimits;
+            NotifyStateChanged(source, "expenseLimits");
         }
 
         public void SetAuthState(ComponentBase source, User user, bool isAuthenticated)

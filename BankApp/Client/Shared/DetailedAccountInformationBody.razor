@@ -14,6 +14,14 @@
                     <BSCollapse>
                         <BSCard CardType="CardType.Body">
                             <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Transaktionsdatum</th>
+                                        <th>Transaktionsnamn</th>
+                                        <th>Kategori</th>
+                                        <th>Summa</th>
+                                    </tr>
+                                </thead>
                                 <tbody>
                                     @foreach (var transaction in Transactions)
                                     {
@@ -30,8 +38,6 @@
             </BSCollapseItem>
         }
     </BSCollapseGroup>
-
-
 </div>
 
 

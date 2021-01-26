@@ -1,58 +1,62 @@
 ﻿@page "/categories"
 @inject HttpClient http
 @inject AppStateContainer AppState
+@inject NavigationManager navManager
 @implements IDisposable
 
-<h3>Kategorier</h3>
+@if (AppState.IsAuth)
+{
+    <h3>Kategorier</h3>
 
-<div style="display: flex; justify-content:space-between;">
-    <BSCard CardType="CardType.Card">
-        <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Lägg till kategori</BSCard>
-        <BSCard CardType="CardType.Body">
-            <BSForm Model="newCategory" OnSubmit="CreateCategory">
-                <BSFormGroup>
-                    <BSLabel>Namn</BSLabel>
-                    <BSInput @bind-Value="newCategory.Name" placeholder="Namnge kategori..."></BSInput>
-                </BSFormGroup>
-                <BSFormGroup>
-                    <BSLabel>Färg</BSLabel>
-                    <BSInput InputType="InputType.Color" @bind-Value="newCategory.Color"></BSInput>
-                </BSFormGroup>
-                <BSButton ButtonType="ButtonType.Submit">Lägg till</BSButton>
-            </BSForm>
+    <div style="display: flex; justify-content:space-between;">
+        <BSCard CardType="CardType.Card">
+            <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Lägg till kategori</BSCard>
+            <BSCard CardType="CardType.Body">
+                <BSForm Model="newCategory" OnSubmit="CreateCategory">
+                    <BSFormGroup>
+                        <BSLabel>Namn</BSLabel>
+                        <BSInput @bind-Value="newCategory.Name" placeholder="Namnge kategori..."></BSInput>
+                    </BSFormGroup>
+                    <BSFormGroup>
+                        <BSLabel>Färg</BSLabel>
+                        <BSInput InputType="InputType.Color" @bind-Value="newCategory.Color"></BSInput>
+                    </BSFormGroup>
+                    <BSButton ButtonType="ButtonType.Submit">Lägg till</BSButton>
+                </BSForm>
+            </BSCard>
         </BSCard>
-    </BSCard>
 
-    <BSCard CardType="CardType.Card">
-        <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Befintliga kategorier</BSCard>
-        <BSCard CardType="CardType.Body">
-            @if (AppState.Categories != null && AppState.Categories.Count != 0)
-            {
-                @foreach (var category in AppState.Categories)
+        <BSCard CardType="CardType.Card">
+            <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Befintliga kategorier</BSCard>
+            <BSCard CardType="CardType.Body">
+                @if (AppState.Categories != null && AppState.Categories.Count != 0)
                 {
-                    if (category.IsBeingModified)
+                    @foreach (var category in AppState.Categories)
                     {
-                        <BSForm IsInline="true" Model="category" OnSubmit="@(() => UpdateCategory(category))">
-                            <BSInput InputType="InputType.Text" @bind-Value="category.Name"></BSInput>
-                            <BSInput InputType="InputType.Color" @bind-Value="category.Color"></BSInput>
-                            <BSButton ButtonType="ButtonType.Submit">Spara</BSButton>
-                        </BSForm>
-                    }
-                    else
-                    {
-                        <div style="background: linear-gradient(180deg, @category.Color 0%, rgba(228, 80, 80, 0) 120%); display: flex; justify-content:space-between">
-                            <p>@category.Name</p>
-                            <div>
-                                <BSButton OnClick="(() => category.SetModificationState(true))">Redigera</BSButton>
-                                <BSButton OnClick="(() => RemoveCategory(category.Id))">Ta bort</BSButton> @*öppna modal => ta bort i modal*@
+                        if (category.IsBeingModified)
+                        {
+                            <BSForm IsInline="true" Model="category" OnSubmit="@(() => UpdateCategory(category))">
+                                <BSInput InputType="InputType.Text" @bind-Value="category.Name"></BSInput>
+                                <BSInput InputType="InputType.Color" @bind-Value="category.Color"></BSInput>
+                                <BSButton ButtonType="ButtonType.Submit">Spara</BSButton>
+                            </BSForm>
+                        }
+                        else
+                        {
+                            <div style="background: linear-gradient(180deg, @category.Color 0%, rgba(228, 80, 80, 0) 120%); display: flex; justify-content:space-between">
+                                <p>@category.Name</p>
+                                <div>
+                                    <BSButton OnClick="(() => category.SetModificationState(true))">Redigera</BSButton>
+                                    <BSButton OnClick="(() => RemoveCategory(category.Id))">Ta bort</BSButton> @*öppna modal => ta bort i modal*@
+                                </div>
                             </div>
-                        </div>
+                        }
                     }
                 }
-            }
+            </BSCard>
         </BSCard>
-    </BSCard>
-</div>
+    </div>
+}
 
 @code {
     Category newCategory = new Category();
@@ -61,9 +65,17 @@
 
     protected override void OnInitialized()
     {
-        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
 
-        var userId = "id";
+        if (!AppState.IsAuth)
+        {
+            navManager.NavigateTo("/");
+        }
+        else
+        {
+            AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+        }
+
+
     }
 
     private async Task GetCategories()

@@ -17,5 +17,9 @@ namespace BankApp.Shared.Entities
         public string OwnerId { get; set; }
         [FirestoreProperty]
         public double Amount { get; set; }
+        [FirestoreProperty]
+        public DateTime StartDate { get; set; }
+        [FirestoreProperty]
+        public DateTime EndDate { get; set; }
     }
 }

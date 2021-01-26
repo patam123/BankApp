@@ -26,10 +26,10 @@
         <BSLabel For="repeatpassword">Upprepa lösenord</BSLabel>
         <BSInput T="string" Id="repeatpassword" InputType="InputType.Password" @bind-Value="registrationModel.RepeatPassword" />
     </BSFormGroup>
-    <BSButton ButtonType="ButtonType.Submit">Registrera</BSButton>
+    <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Registrera</BSButton>
 </BSForm>
 
-<NavLink href="login" >Har du redan ett konto? Logga in</NavLink>
+<NavLink href="/">Har du redan ett konto? Logga in</NavLink>
 
 @code {
 

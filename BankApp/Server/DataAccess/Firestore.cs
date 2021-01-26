@@ -178,6 +178,31 @@ namespace BankApp.Server.DataAccess
                         var expenseLimit = documentSnapshot.ToDictionary();
                         if (expenseLimit.Where(x => x.Key == "OwnerId" && (string)x.Value == userId).Count() > 0)
                         {
+
+                            object startDateValue;
+                            object endDateValue;
+
+                            expenseLimit.TryGetValue("StartDate", out startDateValue);
+
+                            int startYear = int.Parse(startDateValue.ToString().Substring(0, 4));
+                            int startMonth = int.Parse(startDateValue.ToString().Substring(5, 2));
+                            int startDay = int.Parse(startDateValue.ToString().Substring(8, 2));
+                            DateTime startDate = new DateTime(startYear, startMonth, startDay);
+
+                            expenseLimit.Remove("StartDate");
+                            expenseLimit.Add("StartDate", startDate);
+
+                            expenseLimit.TryGetValue("EndDate", out endDateValue);
+
+                            int endYear = int.Parse(endDateValue.ToString().Substring(0, 4));
+                            int endMonth = int.Parse(endDateValue.ToString().Substring(5, 2));
+                            int endDay = int.Parse(endDateValue.ToString().Substring(8, 2));
+                            DateTime endDate = new DateTime(endYear, endMonth, endDay);
+
+                            expenseLimit.Remove("EndDate");
+                            expenseLimit.Add("EndDate", endDate);
+
+
                             string jsonExpenseLimit = JsonConvert.SerializeObject(expenseLimit);
                             var newExpenseLimit = JsonConvert.DeserializeObject<ExpenseLimit>(jsonExpenseLimit);
                             newExpenseLimit.Id = documentSnapshot.Id;
@@ -201,7 +226,10 @@ namespace BankApp.Server.DataAccess
             try
             {
                 var catRef = firestore.Collection("expenseLimits");
-                await catRef.AddAsync(expenseLimit);
+                var startDateString = expenseLimit.StartDate.Year.ToString() + "-" + (expenseLimit.StartDate.Month < 10 ? "0" + expenseLimit.StartDate.Month.ToString() : expenseLimit.StartDate.Month.ToString()) + "-" + (expenseLimit.StartDate.Day < 10 ? "0" + expenseLimit.StartDate.Day.ToString() : expenseLimit.StartDate.Day.ToString());
+                var endDateString = expenseLimit.EndDate.Year.ToString() + "-" + (expenseLimit.EndDate.Month < 10 ? "0" + expenseLimit.EndDate.Month.ToString() : expenseLimit.EndDate.Month.ToString()) + "-" + (expenseLimit.EndDate.Day < 10 ? "0" + expenseLimit.EndDate.Day.ToString() : expenseLimit.EndDate.Day.ToString());
+                var newExpenseLimit = new { Name = expenseLimit.Name, CategoryId = expenseLimit.CategoryId, OwnerId = expenseLimit.OwnerId, Amount = expenseLimit.Amount, StartDate = startDateString, EndDate = endDateString };
+                await catRef.AddAsync(newExpenseLimit);
             }
             catch (Exception)
             {
@@ -215,7 +243,10 @@ namespace BankApp.Server.DataAccess
             try
             {
                 var docRef = firestore.Collection("expenseLimits").Document(expenseLimit.Id);
-                await docRef.SetAsync(expenseLimit, SetOptions.Overwrite);
+                var startDateString = expenseLimit.StartDate.Year.ToString() + "-" + (expenseLimit.StartDate.Month < 10 ? "0" + expenseLimit.StartDate.Month.ToString() : expenseLimit.StartDate.Month.ToString()) + "-" + (expenseLimit.StartDate.Day < 10 ? "0" + expenseLimit.StartDate.Day.ToString() : expenseLimit.StartDate.Day.ToString());
+                var endDateString = expenseLimit.EndDate.Year.ToString() + "-" + (expenseLimit.EndDate.Month < 10 ? "0" + expenseLimit.EndDate.Month.ToString() : expenseLimit.EndDate.Month.ToString()) + "-" + (expenseLimit.EndDate.Day < 10 ? "0" + expenseLimit.EndDate.Day.ToString() : expenseLimit.EndDate.Day.ToString());
+
+                await docRef.SetAsync(new { Name = expenseLimit.Name, CategoryId = expenseLimit.CategoryId, OwnerId = expenseLimit.OwnerId, Amount = expenseLimit.Amount, StartDate = startDateString, EndDate = endDateString }, SetOptions.Overwrite);
             }
             catch (Exception)
             {
