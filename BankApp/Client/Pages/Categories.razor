@@ -9,7 +9,7 @@
     <h3>Kategorier</h3>
 
     <div style="display: flex; justify-content:space-between;">
-        <BSCard CardType="CardType.Card">
+        <BSCard style="width: 300px" CardType="CardType.Card">
             <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Lägg till kategori</BSCard>
             <BSCard CardType="CardType.Body">
                 <BSForm Model="newCategory" OnSubmit="CreateCategory">
@@ -21,12 +21,12 @@
                         <BSLabel>Färg</BSLabel>
                         <BSInput InputType="InputType.Color" @bind-Value="newCategory.Color"></BSInput>
                     </BSFormGroup>
-                    <BSButton ButtonType="ButtonType.Submit">Lägg till</BSButton>
+                    <BSButton Color="Color.Dark" ButtonType="ButtonType.Submit">Lägg till</BSButton>
                 </BSForm>
             </BSCard>
         </BSCard>
 
-        <BSCard CardType="CardType.Card">
+        <BSCard style="width: 500px" CardType="CardType.Card">
             <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Befintliga kategorier</BSCard>
             <BSCard CardType="CardType.Body">
                 @if (AppState.Categories != null && AppState.Categories.Count != 0)
@@ -38,7 +38,7 @@
                             <BSForm IsInline="true" Model="category" OnSubmit="@(() => UpdateCategory(category))">
                                 <BSInput InputType="InputType.Text" @bind-Value="category.Name"></BSInput>
                                 <BSInput InputType="InputType.Color" @bind-Value="category.Color"></BSInput>
-                                <BSButton ButtonType="ButtonType.Submit">Spara</BSButton>
+                                <BSButton Color="Color.Success" ButtonType="ButtonType.Submit">Spara</BSButton>
                             </BSForm>
                         }
                         else
@@ -46,8 +46,8 @@
                             <div style="background: linear-gradient(180deg, @category.Color 0%, rgba(228, 80, 80, 0) 120%); display: flex; justify-content:space-between">
                                 <p>@category.Name</p>
                                 <div>
-                                    <BSButton OnClick="(() => category.SetModificationState(true))">Redigera</BSButton>
-                                    <BSButton OnClick="(() => RemoveCategory(category.Id))">Ta bort</BSButton> @*öppna modal => ta bort i modal*@
+                                    <BSButton Color="Color.Dark" OnClick="(() => category.SetModificationState(true))">Redigera</BSButton>
+                                    <BSButton Color="Color.Danger" OnClick="(() => RemoveCategory(category.Id))">Ta bort</BSButton> @*öppna modal => ta bort i modal*@
                                 </div>
                             </div>
                         }
@@ -56,12 +56,65 @@
             </BSCard>
         </BSCard>
     </div>
+    <br />
+    <div class="accordion">
+        <BSCard CardType="CardType.Card">
+            <BSCard CardType="CardType.Header" Color="Color.Dark">Utgiftsmål</BSCard>
+            <BSCard style="justify-content:space-between" CardType="CardType.Body">
+                <BSCard CardType="CardType.Card">
+                    <BSCard CardType="CardType.Header">Lägg till utgiftsmål</BSCard>
+                    <BSCard CardType="CardType.Body"></BSCard>
+                    <BSForm Model="newExpenseLimit" OnSubmit="CreateExpenseLimit">
+                        <BSFormGroup>
+                            <BSLabel>Namn</BSLabel>
+                            <BSInput @bind-Value="newExpenseLimit.Name"></BSInput>
+                        </BSFormGroup>
+                        <BSFormGroup>
+                            <BSLabel>Kategori</BSLabel>
+                            <BSInput InputType="InputType.Select" @bind-Value="newExpenseLimit.CategoryId">
+                                @foreach (var category in AppState.Categories)
+                                    {
+                                    <option value="@category.Id">@category.Name</option>
+                                    }
+                            </BSInput>
+                        </BSFormGroup>
+                        <BSFormGroup>
+                            <BSLabel>Summa</BSLabel>
+                            <BSInput InputType="InputType.Number" @bind-Value="newExpenseLimit.Amount"></BSInput>
+                        </BSFormGroup>
+                        <BSFormGroup>
+                            <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Välj datum</BSButton>
+                            <BSModal @ref="DateModal">
+                                <BSModalHeader OnClick="@(() => DateModal.Hide())">Ändra tidsintervall</BSModalHeader>
+                                <BSModalBody>
+                                    <DisplayDatesModal SetFromDate="SetFromDate" SetToDate="SetToDate" />
+                                </BSModalBody>
+                                <BSModalFooter>
+                                    <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Hide())">Stäng</BSButton>
+                                </BSModalFooter>
+                            </BSModal>
+                        </BSFormGroup>
+                        <BSButton ButtonType="ButtonType.Submit">Lägg till</BSButton>
+                    </BSForm>
+                </BSCard>
+                <BSCard CardType="CardType.Card">
+                    <BSCard CardType="CardType.Header">Redigera utgiftsmål</BSCard>
+                    <BSCard CardType="CardType.Body"></BSCard>
+
+                </BSCard>
+            </BSCard>
+        </BSCard>
+    </div>
 }
 
 @code {
+    BSModal DateModal { get; set; }
     Category newCategory = new Category();
+    ExpenseLimit newExpenseLimit = new ExpenseLimit();
     //[CascadingParameter] public MainLayout MainLayout { get; set; }
     List<Category> categories = new List<Category>();
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
 
     protected override void OnInitialized()
     {
@@ -76,6 +129,26 @@
         }
 
 
+    }
+
+    public void SetFromDate(ChangeEventArgs e)
+    {
+        var year = int.Parse(e.Value.ToString().Substring(0, 4));
+        var month = int.Parse(e.Value.ToString().Substring(5, 2));
+        var day = int.Parse(e.Value.ToString().Substring(8, 2));
+
+        StartDate = new DateTime(year, month, day);
+        Console.WriteLine(StartDate);
+    }
+
+    public void SetToDate(ChangeEventArgs e)
+    {
+        var year = int.Parse(e.Value.ToString().Substring(0, 4));
+        var month = int.Parse(e.Value.ToString().Substring(5, 2));
+        var day = int.Parse(e.Value.ToString().Substring(8, 2));
+
+        EndDate = new DateTime(year, month, day);
+        Console.WriteLine(EndDate);
     }
 
     private async Task GetCategories()
@@ -100,7 +173,12 @@
         categories.RemoveAll(x => x.Id == categoryId);
         AppState.UpdateCategories(this, categories);
         StateHasChanged();
+    }
 
+    private async Task GetExpenseLimits()
+    {
+        var expenseLimits = await http.GetJsonAsync<List<ExpenseLimit>>("api/expenselimits/" + AppState.User.Id);
+        AppState.UpdateExpenseLimits(this, expenseLimits);
     }
 
     private async Task CreateCategory()
@@ -110,6 +188,18 @@
         await http.SendJsonAsync(HttpMethod.Post, "api/categories", newCategory);
         newCategory = new Category();
         await GetCategories();
+
+    }
+
+    private async Task CreateExpenseLimit()
+    {
+        newExpenseLimit.StartDate = StartDate;
+        newExpenseLimit.EndDate = EndDate;
+        newExpenseLimit.OwnerId = AppState.User.Id;
+
+        await http.SendJsonAsync(HttpMethod.Post, "api/expenselimits", newExpenseLimit);
+        newExpenseLimit = new ExpenseLimit();
+        await GetExpenseLimits();
 
     }
 

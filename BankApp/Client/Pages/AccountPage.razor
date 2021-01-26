@@ -46,9 +46,6 @@
                                 <td>@AppState.Transactions.Where(x => x.CategoryId == expenseLimit.CategoryId && x.TransactionDate >= expenseLimit.StartDate && x.TransactionDate <= expenseLimit.EndDate).Sum(x => x.Amount)</td>
                             </tr>
                         </tbody>
-
-
-
                     }
                 </table>
             </BSCard>
