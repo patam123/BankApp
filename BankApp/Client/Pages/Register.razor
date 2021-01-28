@@ -64,6 +64,15 @@
 
             var userId = await RegisterUser(user);
             Console.WriteLine(userId);
+            if (userId != "A user with this email already exists.")
+            {
+                user.Id = userId;
+                await CreateUser(user);
+            }
+            else
+            {
+                // meddela fel: userId
+            }
             StateHasChanged();
             //registrationModel = new RegistrationModel();
             //navManager.NavigateTo("/login");
@@ -83,6 +92,10 @@
         var response = await http.PostAsync("/user/register", stringContent);
         var responseContent = await response.Content.ReadAsStringAsync();
         return responseContent;
+    }
+    private async Task CreateUser(User user)
+    {
+        await http.SendJsonAsync(HttpMethod.Post, "user/createuserdoc", user);
     }
 
 }

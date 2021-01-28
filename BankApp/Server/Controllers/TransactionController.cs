@@ -28,5 +28,17 @@ namespace BankApp.Server.Controllers
         {
             firestore.UpdateTransaction(transaction);
         }
+
+        [HttpPost]
+        public void Post([FromBody] Transaction transaction)
+        {
+            firestore.CreateTransaction(transaction);
+        }
+
+        [HttpDelete("{id}")]
+        public void Delete(string id)
+        {
+            firestore.DeleteTransaction(id);
+        }
     }
 }

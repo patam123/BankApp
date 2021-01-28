@@ -7,9 +7,11 @@
 @if (AppState.User != null)
 {
     <h1>@AppState.User.DisplayName</h1>
+
+
+    <h3>Kontoinformation</h3>
 }
 
-<h3>Kontoinformation</h3>
 
 @if (AppState.Categories != null && AppState.Categories.Count > 0 && AppState.Transactions != null && AppState.Transactions.Count > 0)
 {
@@ -66,21 +68,48 @@
 
     public List<Transaction> transactions = new List<Transaction>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
         if (!AppState.IsAuth)
         {
-            navManager.NavigateTo("/");
+            try
+            {
+                var user = await ValidateSession();
+                if (string.IsNullOrEmpty(user.ErrorMessage))
+                {
+                    await GetUser(user.UserId);
+                    await GetCategories();
+                    await GetExpenseLimits();
+                    await GetTransactions();
+                    SetCategorySums();
+                }
+                else
+                {
+                    navManager.NavigateTo("/");
+                }
+            }
+            catch (Exception)
+            {
+
+                navManager.NavigateTo("/");
+                //throw;
+            }
         }
         else
         {
-            AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
             bankAccount = new BankAccount() { Id = "0123456789" };
             SetCategorySums();
         }
     }
 
-    public void SetFromDate(ChangeEventArgs e) // consider refactoring, kan plockas ut för att använda till transactions också
+    private async Task<UserResponse> ValidateSession()
+    {
+        var user = await http.SendJsonAsync<UserResponse>(HttpMethod.Post, "/user/session", null);
+        return user;
+    }
+
+    public void SetFromDate(ChangeEventArgs e)
     {
         var year = int.Parse(e.Value.ToString().Substring(0, 4));
         var month = int.Parse(e.Value.ToString().Substring(5, 2));
@@ -109,6 +138,37 @@
             category.TransactionSum = 0;
             category.TransactionSum += AppState.Transactions.FindAll(x => x.CategoryId.Equals(category.Id) && x.TransactionDate >= fromDate && x.TransactionDate <= toDate).Sum(x => x.Amount);
         }
+    }
+    private async Task GetUser(string userId)
+    {
+        var user = await http.GetJsonAsync<User>("api/user/" + userId);
+        AppState.SetAuthState(this, user, true);
+    }
+
+    private async Task GetCategories()
+    {
+        categories = await http.GetJsonAsync<List<Category>>($"api/categories/{AppState.User.Id}");
+        AppState.UpdateCategories(this, categories);
+    }
+    private async Task GetTransactions()
+    {
+        try
+        {
+            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
+            AppState.UpdateTransactions(this, transactions);
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private async Task GetExpenseLimits()
+    {
+        var expenseLimits = await http.GetJsonAsync<List<ExpenseLimit>>("api/expenselimits/" + AppState.User.Id);
+        AppState.UpdateExpenseLimits(this, expenseLimits);
     }
 
     private async Task AppState_StateChanged(ComponentBase source, string property)

@@ -11,11 +11,11 @@ namespace BankApp.Client.Helpers
     {
         public bool IsAuth { get; private set; }
 
-        public User User { get; set; }
+        public User User { get; private set; }
 
         public List<Transaction> Transactions { get; private set; }
         public List<Category> Categories { get; private set; }
-        public List<ExpenseLimit> ExpenseLimits { get; set; }
+        public List<ExpenseLimit> ExpenseLimits { get; private set; }
 
         public void UpdateCategories(ComponentBase source, List<Category> categories)
         {

@@ -3,8 +3,6 @@
 @inject AppStateContainer AppState
 @inject HttpClient http
 @implements IDisposable
-@using System.Text
-@using System.Text.Json
 
 <BSForm Model="loginModel" OnValidSubmit="(() => OnSubmit())">
     <BSFormGroup>
@@ -46,15 +44,14 @@
         //Console.WriteLine(hello.IsSuccessStatusCode.ToString());
         if (userResp.UserId != null)
         {
+            await http.SendJsonAsync(HttpMethod.Post, "/user/cookie", userResp);
+
             await GetCategories(userResp.UserId);
 
             await GetTransactions(userResp.UserId);
             await GetExpenseLimits(userResp.UserId);
             //skicka loginModel till api => få tillbaka response =>
-            User loggedInUser = new User();
-            loggedInUser.Id = userResp.UserId;
-            loggedInUser.DisplayName = userResp.DisplayName;
-            AppState.SetAuthState(this, loggedInUser, true);
+            await GetUser(userResp.UserId);
             navManager.NavigateTo("/account");
         }
         else
@@ -118,6 +115,13 @@
 
             throw;
         }
+    }
+
+    private async Task GetUser(string id)
+    {
+        var user = await http.GetJsonAsync<User>("api/user/" + id);
+        Console.WriteLine(user.Id);
+        AppState.SetAuthState(this, user, true);
     }
 
     private async Task AppState_StateChanged(ComponentBase source, string property)

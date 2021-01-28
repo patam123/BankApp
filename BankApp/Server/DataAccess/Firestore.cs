@@ -146,6 +146,22 @@ namespace BankApp.Server.DataAccess
             }
         }
 
+        public async void CreateTransaction(Shared.Entities.Transaction transaction)
+        {
+            try
+            {
+                var docRef = firestore.Collection("transactions");
+                var dateString = transaction.TransactionDate.Year.ToString() + "-" + (transaction.TransactionDate.Month < 10 ? "0" + transaction.TransactionDate.Month.ToString() : transaction.TransactionDate.Month.ToString()) + "-" + (transaction.TransactionDate.Day < 10 ? "0" + transaction.TransactionDate.Day.ToString() : transaction.TransactionDate.Day.ToString());
+                await docRef.AddAsync(new { TransactionDate = dateString, Amount = transaction.Amount, Description = transaction.Description, CategoryId = transaction.CategoryId, TransactionId = transaction.TransactionId });
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+        }
+
         public async void UpdateTransaction(Shared.Entities.Transaction transaction)
         {
             try
@@ -153,6 +169,20 @@ namespace BankApp.Server.DataAccess
                 var docRef = firestore.Collection("transactions").Document(transaction.Id);
                 var dateString = transaction.TransactionDate.Year.ToString() + "-" + (transaction.TransactionDate.Month < 10 ? "0" + transaction.TransactionDate.Month.ToString() : transaction.TransactionDate.Month.ToString()) + "-" + (transaction.TransactionDate.Day < 10 ? "0" + transaction.TransactionDate.Day.ToString() : transaction.TransactionDate.Day.ToString());
                 await docRef.SetAsync(new { TransactionDate = dateString, Amount = transaction.Amount, Description = transaction.Description, CategoryId = transaction.CategoryId, TransactionId = transaction.TransactionId }, SetOptions.Overwrite);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async void DeleteTransaction(string id)
+        {
+            try
+            {
+                var docRef = firestore.Collection("transactions").Document(id);
+                await docRef.DeleteAsync();
             }
             catch (Exception)
             {
@@ -225,11 +255,11 @@ namespace BankApp.Server.DataAccess
         {
             try
             {
-                var catRef = firestore.Collection("expenseLimits");
+                var docRef = firestore.Collection("expenseLimits");
                 var startDateString = expenseLimit.StartDate.Year.ToString() + "-" + (expenseLimit.StartDate.Month < 10 ? "0" + expenseLimit.StartDate.Month.ToString() : expenseLimit.StartDate.Month.ToString()) + "-" + (expenseLimit.StartDate.Day < 10 ? "0" + expenseLimit.StartDate.Day.ToString() : expenseLimit.StartDate.Day.ToString());
                 var endDateString = expenseLimit.EndDate.Year.ToString() + "-" + (expenseLimit.EndDate.Month < 10 ? "0" + expenseLimit.EndDate.Month.ToString() : expenseLimit.EndDate.Month.ToString()) + "-" + (expenseLimit.EndDate.Day < 10 ? "0" + expenseLimit.EndDate.Day.ToString() : expenseLimit.EndDate.Day.ToString());
                 var newExpenseLimit = new { Name = expenseLimit.Name, CategoryId = expenseLimit.CategoryId, OwnerId = expenseLimit.OwnerId, Amount = expenseLimit.Amount, StartDate = startDateString, EndDate = endDateString };
-                await catRef.AddAsync(newExpenseLimit);
+                await docRef.AddAsync(newExpenseLimit);
             }
             catch (Exception)
             {
@@ -267,6 +297,88 @@ namespace BankApp.Server.DataAccess
             {
 
                 throw;
+            }
+        }
+
+        // User methods
+
+        public async Task<User> GetUser(string id)
+        {
+            try
+            {
+                var newUser = new User();
+                var userRef = firestore.Collection("users").Document(id);
+                var userSnapshot = await userRef.GetSnapshotAsync();
+                if (userSnapshot.Exists)
+                {
+                    var user = userSnapshot.ToDictionary();
+                    var jsonUser = JsonConvert.SerializeObject(user);
+                    newUser = JsonConvert.DeserializeObject<User>(jsonUser);
+                    newUser.Id = userSnapshot.Id;
+                    newUser.Password = "l";
+                }
+                return newUser;
+            }
+            catch (Exception)
+            {
+
+                return new User();
+            }
+        }
+
+        public async void CreateUser(User user)
+        {
+            try
+            {
+
+                await firestore.Collection("users").Document(user.Id).SetAsync(user);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<string> UpdateUser(User user)
+        {
+            try
+            {
+                var result = await firestore.Collection("users").Document(user.Id).SetAsync(user, SetOptions.Overwrite);
+                var time = result.UpdateTime.ToString();
+                if (!string.IsNullOrEmpty(time))
+                {
+                    return "Användaren uppdaterad.";
+                }
+                else
+                {
+                    return "Något gick fel. Uppdateringen misslyckades.";
+                }
+            }
+            catch (Exception)
+            {
+
+                return "Något gick fel. Uppdateringen misslyckades.";
+            }
+        }
+        public async Task<string> DeleteUser(string id)
+        {
+            try
+            {
+                var result = await firestore.Collection("users").Document(id).DeleteAsync();
+                var time = result.UpdateTime.ToString();
+                if (!string.IsNullOrEmpty(time))
+                {
+                    return "Användaren raderades.";
+                }
+                else
+                {
+                    return "Något gick fel. Användaren kunde inte raderas.";
+                }
+            }
+            catch (Exception)
+            {
+                return "Något gick fel. Användaren kunde inte raderas.";
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿@inject AppStateContainer AppState
+@inject HttpClient http
 @implements IDisposable
 
     <div class="top-row pl-4 navbar navbar-dark">
@@ -43,8 +44,9 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
-    private void Logout()
+    private async void Logout()
     {
+        await http.SendJsonAsync(HttpMethod.Post, "/user/logout", null);
         AppState.SetAuthState(this, AppState.User, false);
     }
 

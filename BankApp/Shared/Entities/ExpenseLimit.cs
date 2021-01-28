@@ -21,5 +21,12 @@ namespace BankApp.Shared.Entities
         public DateTime StartDate { get; set; }
         [FirestoreProperty]
         public DateTime EndDate { get; set; }
+
+        public bool IsBeingModified { get; private set; }
+
+        public void SetModificationState(bool isModifying)
+        {
+            IsBeingModified = isModifying;
+        }
     }
 }

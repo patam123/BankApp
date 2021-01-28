@@ -50,15 +50,32 @@ else
     public List<Category> categories = new List<Category>();
 
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
         if (!AppState.IsAuth)
         {
-            navManager.NavigateTo("/");
-        }
-        else
-        {
-            AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+            try
+            {
+                var user = await ValidateSession();
+                if (string.IsNullOrEmpty(user.ErrorMessage))
+                {
+                    await GetUser(user.UserId);
+                    await GetCategories();
+                    await GetTransactions();
+                    await GetExpenseLimits();
+                }
+                else
+                {
+                    navManager.NavigateTo("/");
+                }
+            }
+            catch (Exception)
+            {
+
+                navManager.NavigateTo("/");
+                //throw;
+            }
         }
     }
 
@@ -66,7 +83,7 @@ else
     {
         try
         {
-            categories = await http.GetJsonAsync<List<Category>>("api/categories");
+            categories = await http.GetJsonAsync<List<Category>>("api/categories/" + AppState.User.Id);
             AppState.UpdateCategories(this, categories);
 
         }
@@ -77,11 +94,17 @@ else
         }
     }
 
+    private async Task<UserResponse> ValidateSession()
+    {
+        var user = await http.SendJsonAsync<UserResponse>(HttpMethod.Post, "/user/session", null);
+        return user;
+    }
+
     private async Task GetTransactions()
     {
         try
         {
-            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions");
+            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
             AppState.UpdateTransactions(this, transactions);
 
         }
@@ -90,6 +113,11 @@ else
 
             throw;
         }
+    }
+    private async Task GetUser(string userId)
+    {
+        var user = await http.GetJsonAsync<User>("api/user/" + userId);
+        AppState.SetAuthState(this, user, true);
     }
 
     public void SetCurrentCategory(string categoryId)
@@ -102,6 +130,12 @@ else
         {
             currentCategory = AppState.Categories.Find(x => x.Id.Equals(categoryId));
         }
+    }
+
+    private async Task GetExpenseLimits()
+    {
+        var expenseLimits = await http.GetJsonAsync<List<ExpenseLimit>>("api/expenselimits/" + AppState.User.Id);
+        AppState.UpdateExpenseLimits(this, expenseLimits);
     }
 
     private int GetTransactionCount()

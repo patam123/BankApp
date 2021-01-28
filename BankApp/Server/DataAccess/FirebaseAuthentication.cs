@@ -14,7 +14,6 @@ namespace BankApp.Server.DataAccess
 {
     public class FirebaseAuthentication
     {
-        public int MyProperty { get; set; }
         public async Task<string> CreateUser(User user)
         {
             try
@@ -32,20 +31,59 @@ namespace BankApp.Server.DataAccess
                 Console.WriteLine(userRecord.Uid);
                 return userRecord.Uid;
             }
-            catch (Exception)
+            catch (FirebaseAuthException)
             {
 
-                throw;
+                return "A user with this email already exists.";
             }
             
+        }
+
+        public async Task<string> UpdateUser(User user)
+        {
+            try
+            {
+                UserRecordArgs userRecordArgs = new UserRecordArgs()
+                {
+                    Uid = user.Id,
+                    Email = user.Email,
+                    DisplayName = user.FirstName + " " + user.LastName,
+                };
+                var userRecord = await FirebaseAuth.DefaultInstance.UpdateUserAsync(userRecordArgs);
+                if (!string.IsNullOrEmpty(userRecord.Uid))
+                {
+                    return "Användare uppdaterad";
+                }
+                else
+                {
+                    return "Något gick fel. Uppdatering misslyckades";
+                }
+            }
+            catch (FirebaseAuthException)
+            {
+
+                return "Något gick fel. Uppdatering misslyckades";
+            }
+        }
+
+        public async Task<string> DeleteUser(string id)
+        {
+            try
+            {
+                await FirebaseAuth.DefaultInstance.DeleteUserAsync(id);
+                return "Användaren raderades.";
+            }
+            catch (FirebaseAuthException)
+            {
+
+                return "Något gick fel. Användaren kunde inte raderas.";
+            }
         }
 
         public async Task<UserResponse> LogIn(User user)
         {
             try
             {
-
-
                 var filepath = @"C:\Users\patri\Desktop\bankapikey.txt";
 
                 var apiKey = File.ReadAllText(filepath);
