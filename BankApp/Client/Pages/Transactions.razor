@@ -5,6 +5,7 @@
 @implements IDisposable
 
 
+
 @if (AppState.Categories != null && AppState.Categories.Count > 0)
 {
 
@@ -12,39 +13,71 @@
     <TransactionHeader FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="AppState.Categories" CurrentCategory="currentCategory" />
 }
 
-@if (AppState.Transactions == null && AppState.Categories == null)
+@if (AppState.Categories != null && AppState.Categories.Count > 0 && AppState.Transactions != null && AppState.Transactions.Count > 0)
 {
-    <p><em>Loading...</em></p>
-}
 
-else
+    <TransactionBody Categories="AppState.Categories" CurrentCategory="currentCategory" FromDate="fromDate" ToDate="toDate" Index="index" PageSize="pageSize" Transactions="AppState.Transactions" />
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index - 1))">Föregående</div></li>
+            @for (int i = 0; i < (GetTransactionCount() / pageSize) + 1; i++)
+            {
+                var n = i;
+                <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(n))">@(i + 1) </div></li>
+
+            }
+            <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index + 1))">Nästa</div></li>
+        </ul>
+    </nav>
+}
+@if (AppState.IsAuth)
 {
-    if (AppState.Categories != null && AppState.Categories.Count > 0 && AppState.Transactions != null && AppState.Transactions.Count > 0)
-    {
+    <BSButton Color="Color.Dark" @onclick="@(() => ShowTransModal())">Skapa transaktion</BSButton>
+    <BSModal @ref="TransactionModal">
+        <BSModalHeader OnClick="@(() => TransactionModal.Hide())">Skapa transaktion</BSModalHeader>
+        <BSModalBody>
+            <div style="display:flex; flex-direction: column">
+                <label for="newtransactiondate">Transaktionsdatum</label>
+                <input id="newtransactiondate" name="newtransactiondate" type="date" min="1969-01-01" max="@DateTime.Today.ToShortDateString()" @bind-value="newTransaction.TransactionDate" />
+            </div>
+            <div style="display:flex; flex-direction: column">
+                <label for="transactiondescription">Beskrivning av transaktion</label>
+                <input id="transactiondescription" name="transactiondescription" type="text"  @bind-value="newTransaction.Description" />
+            </div>
+            <br />
+            <div style="display:flex; flex-direction: column">
+                <select @bind="newTransaction.CategoryId">
+                    @foreach (var category in AppState.Categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div style="display:flex; flex-direction: column">
+                <label for="transactionamount">Summa</label>
+                <input id="transactionamount" name="transactionamount" type="number" @bind-value="newTransaction.Amount" />
+            </div>
 
-        <TransactionBody Categories="AppState.Categories" CurrentCategory="currentCategory" FromDate="fromDate" ToDate="toDate" Index="index" PageSize="pageSize" Transactions="AppState.Transactions" />
 
-        <nav aria-label="Page navigation example">
-            <ul class="pagination">
-                <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index - 1))">Föregående</div></li>
-                @for (int i = 0; i < (GetTransactionCount() / pageSize) + 1; i++)
-                {
-                    var n = i;
-                    <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(n))">@(i + 1) </div></li>
 
-                }
-                <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index + 1))">Nästa</div></li>
-            </ul>
-        </nav>
-    }
+        </BSModalBody>
+        <BSModalFooter>
+            <BSButton Color="Color.Dark" @onclick="@(() => CreateTransaction())">Skapa transaktion</BSButton>
+            <BSButton Color="Color.Dark" @onclick="@(() => TransactionModal.Hide())">Stäng</BSButton>
+        </BSModalFooter>
+    </BSModal>
 }
-
 @code {
+
+    BSModal TransactionModal { get; set; }
     int index = 0;
     int pageSize = 5;
 
     DateTime fromDate = DateTime.Today.AddMonths(-1);
     DateTime toDate = DateTime.Today;
+
+    Transaction newTransaction = new Transaction() { TransactionDate = DateTime.Today };
     public Category currentCategory = new Category() { Id = null };
     public List<Transaction> transactions = new List<Transaction>();
     public List<Category> categories = new List<Category>();
@@ -78,6 +111,15 @@ else
             }
         }
     }
+
+    private void ShowTransModal()
+    {
+        newTransaction = new Transaction()
+        {
+            TransactionDate = DateTime.Today
+        };
+        TransactionModal.Show();
+}
 
     private async Task GetCategories()
     {
@@ -158,6 +200,16 @@ else
             index = i;
             Console.WriteLine(index);
         }
+    }
+
+    private async void CreateTransaction()
+    {
+        newTransaction.OwnerId = AppState.User.Id;
+        await http.SendJsonAsync(HttpMethod.Post, "api/transactions", newTransaction);
+        newTransaction = new Transaction();
+        await GetTransactions();
+        TransactionModal.Hide();
+        StateHasChanged();
     }
 
     public void SetFromDate(ChangeEventArgs e)

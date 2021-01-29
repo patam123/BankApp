@@ -136,8 +136,8 @@ namespace BankApp.Server.DataAccess
 
                     }
                 }
-                var sortedTransactions = transactionList.OrderBy(x => x.TransactionDate).ToList();
-                return transactionList;
+                var sortedTransactions = transactionList.OrderByDescending(x => x.TransactionDate).ToList();
+                return sortedTransactions;
             }
             catch (Exception)
             {
@@ -152,7 +152,7 @@ namespace BankApp.Server.DataAccess
             {
                 var docRef = firestore.Collection("transactions");
                 var dateString = transaction.TransactionDate.Year.ToString() + "-" + (transaction.TransactionDate.Month < 10 ? "0" + transaction.TransactionDate.Month.ToString() : transaction.TransactionDate.Month.ToString()) + "-" + (transaction.TransactionDate.Day < 10 ? "0" + transaction.TransactionDate.Day.ToString() : transaction.TransactionDate.Day.ToString());
-                await docRef.AddAsync(new { TransactionDate = dateString, Amount = transaction.Amount, Description = transaction.Description, CategoryId = transaction.CategoryId, TransactionId = transaction.TransactionId });
+                await docRef.AddAsync(new { TransactionDate = dateString, Amount = transaction.Amount, Description = transaction.Description, CategoryId = transaction.CategoryId, TransactionId = transaction.TransactionId, OwnerId = transaction.OwnerId });
             }
             catch (Exception)
             {
@@ -168,7 +168,7 @@ namespace BankApp.Server.DataAccess
             {
                 var docRef = firestore.Collection("transactions").Document(transaction.Id);
                 var dateString = transaction.TransactionDate.Year.ToString() + "-" + (transaction.TransactionDate.Month < 10 ? "0" + transaction.TransactionDate.Month.ToString() : transaction.TransactionDate.Month.ToString()) + "-" + (transaction.TransactionDate.Day < 10 ? "0" + transaction.TransactionDate.Day.ToString() : transaction.TransactionDate.Day.ToString());
-                await docRef.SetAsync(new { TransactionDate = dateString, Amount = transaction.Amount, Description = transaction.Description, CategoryId = transaction.CategoryId, TransactionId = transaction.TransactionId }, SetOptions.Overwrite);
+                await docRef.SetAsync(new { TransactionDate = dateString, Amount = transaction.Amount, Description = transaction.Description, CategoryId = transaction.CategoryId, TransactionId = transaction.TransactionId, OwnerId = transaction.OwnerId }, SetOptions.Overwrite);
             }
             catch (Exception)
             {
@@ -332,6 +332,7 @@ namespace BankApp.Server.DataAccess
             {
 
                 await firestore.Collection("users").Document(user.Id).SetAsync(user);
+
             }
             catch (Exception)
             {

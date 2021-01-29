@@ -24,7 +24,7 @@ namespace BankApp.Server.Controllers
 
         [HttpPost]
         [Route("/user/register")]
-        public Task<string> Register([FromBody] User user) // kan lägga CreateUser här?
+        public Task<string> Register([FromBody] User user)
         {
             return fireAuth.CreateUser(user);
         }
@@ -49,12 +49,13 @@ namespace BankApp.Server.Controllers
 
         [HttpDelete]
         [Route("/user/delete")]
-        public async Task<string> Delete([FromBody] string id)
+        public async Task<string> Delete([FromBody] User user)
         {
-            var authResult = await fireAuth.DeleteUser(id);
+            Response.Cookies.Delete("session");
+            var authResult = await fireAuth.DeleteUser(user.Id);
             if (!string.IsNullOrEmpty(authResult))
             {
-                return await firestore.DeleteUser(id);
+                return await firestore.DeleteUser(user.Id);
             }
             return authResult;
         }

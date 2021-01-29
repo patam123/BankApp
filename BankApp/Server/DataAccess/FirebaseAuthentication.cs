@@ -36,18 +36,26 @@ namespace BankApp.Server.DataAccess
 
                 return "A user with this email already exists.";
             }
-            
+
         }
 
         public async Task<string> UpdateUser(User user)
         {
             try
             {
-                UserRecordArgs userRecordArgs = new UserRecordArgs()
+                UserRecordArgs userRecordArgs = new UserRecordArgs();
+                if (!string.IsNullOrEmpty(user.Password))
                 {
-                    Uid = user.Id,
-                    Email = user.Email,
-                    DisplayName = user.FirstName + " " + user.LastName,
+                    userRecordArgs.Uid = user.Id;
+                    userRecordArgs.Email = user.Email;
+                    userRecordArgs.Password = user.Password;
+                    userRecordArgs.DisplayName = user.FirstName + " " + user.LastName;
+                }
+                else
+                {
+                    userRecordArgs.Uid = user.Id;
+                    userRecordArgs.Email = user.Email;
+                    userRecordArgs.DisplayName = user.FirstName + " " + user.LastName;
                 };
                 var userRecord = await FirebaseAuth.DefaultInstance.UpdateUserAsync(userRecordArgs);
                 if (!string.IsNullOrEmpty(userRecord.Uid))

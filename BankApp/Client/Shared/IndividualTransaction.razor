@@ -1,11 +1,15 @@
-﻿<tr style="background: linear-gradient(180deg, @Categories.Find(x => x.Id.Equals(Transaction.CategoryId)).Color 0%, rgba(228, 80, 80, 0) 120%);">
+﻿<tr style="background: linear-gradient(180deg, @(Transaction.CategoryId != null ? Categories.Find(x => x.Id.Equals(Transaction.CategoryId)).Color : "#FFFFFF") 0%, rgba(228, 80, 80, 0) 120%);">
     <td>@Transaction.TransactionDate.ToShortDateString()</td>
     <td>@Transaction.Description</td>
     <td>
-        <select class="btn btn-dark" @onchange="((e) => SetCategory(Transaction, e))">
+        <select class="btn btn-dark" @bind="Transaction.CategoryId">
+            @if (Transaction.CategoryId == null)
+            {
+                <option value="">Ej vald</option>
+            }
             @foreach (var category in Categories)
             {
-                var selected = category.Id.Equals(Transaction.CategoryId) ? "selected" : null;
+                var selected = category.Id.Equals(Transaction.CategoryId) && Transaction.CategoryId != null ? "selected" : null;
                 <option selected="@selected" value="@category.Id">@category.Name</option>
             }
         </select>
