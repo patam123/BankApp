@@ -4,7 +4,7 @@
 @inject HttpClient http
 @implements IDisposable
 
-<BSForm Model="loginModel" OnValidSubmit="(() => OnSubmit())">
+<BSForm Model="loginModel" OnSubmit="(() => OnSubmit())">
     <BSFormGroup>
         <BSLabel For="email">Email</BSLabel>
         <BSInput T="string" Id="email" InputType="InputType.Email" @bind-Value="loginModel.Email" />
@@ -15,49 +15,54 @@
     </BSFormGroup>
     <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Logga in</BSButton>
 </BSForm>
-
+<BSModal @ref="LoginModal">
+    <BSModalHeader OnClick="@(() => LoginModal.Hide())">Inloggning misslyckades</BSModalHeader>
+    <BSModalBody>Emailadress eller lösenord felaktigt.</BSModalBody>
+    <BSModalFooter><BSButton Color="Color.Dark" @onclick="@(() => LoginModal.Hide())">Stäng</BSButton></BSModalFooter>
+</BSModal>
 <NavLink href="register">Inget konto? Registrera</NavLink>
 
 @code {
 
+    BSModal LoginModal;
     LoginModel loginModel = new LoginModel();
     private List<Transaction> transactions;
     private List<Category> categories;
 
     private async Task OnSubmit()
     {
-        User user = new User()
+        try
         {
-            Email = loginModel.Email,
-            Password = loginModel.Password,
+            User user = new User()
+            {
+                Email = loginModel.Email,
+                Password = loginModel.Password,
 
-        };
+            };
 
-        var userResp = await LoginRequest(user);
-        Console.WriteLine(userResp.UserId);
+            var userResp = await LoginRequest(user);
 
-        //var datajson = JsonSerializer.Serialize(user);
-        //var content = new StringContent(datajson, Encoding.UTF8, "application/json");
-        //var hello = await http.PostAsync("/user/login", content);
-        //var helloString = await hello.Content.ReadAsStringAsync();
+            if (userResp.UserId != null)
+            {
+                await http.SendJsonAsync(HttpMethod.Post, "/user/cookie", userResp);
 
-        //Console.WriteLine(hello.IsSuccessStatusCode.ToString());
-        if (userResp.UserId != null)
-        {
-            await http.SendJsonAsync(HttpMethod.Post, "/user/cookie", userResp);
+                await GetCategories(userResp.UserId);
 
-            await GetCategories(userResp.UserId);
-
-            await GetTransactions(userResp.UserId);
-            await GetExpenseLimits(userResp.UserId);
-            //skicka loginModel till api => få tillbaka response =>
-            await GetUser(userResp.UserId);
-            navManager.NavigateTo("/account");
+                await GetTransactions(userResp.UserId);
+                await GetExpenseLimits(userResp.UserId);
+                //skicka loginModel till api => få tillbaka response =>
+                await GetUser(userResp.UserId);
+                navManager.NavigateTo("/account");
+            }
+            else
+            {
+                LoginModal.Show();
+            }
         }
-        else
+        catch (NullReferenceException)
         {
-            Console.WriteLine("Användarnamn eller lösenord felaktigt"); // flytta till fbauth.
-            Console.WriteLine(userResp.ErrorMessage);
+
+            LoginModal.Show();
         }
     }
 

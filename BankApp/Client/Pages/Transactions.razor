@@ -4,13 +4,62 @@
 @inject NavigationManager navManager
 @implements IDisposable
 
+@if (AppState.IsAuth)
+{
 
+    <h3>Transaktioner</h3>
+    <BSModal @ref="TransactionModal">
+        <BSModalHeader OnClick="@(() => TransactionModal.Hide())">Skapa transaktion</BSModalHeader>
+        <BSModalBody>
+            <div style="display:flex; flex-direction: column">
+                <label for="newtransactiondate">Transaktionsdatum</label>
+                <input id="newtransactiondate" name="newtransactiondate" type="date" min="1969-01-01" max="@DateTime.Today.ToShortDateString()" @bind-value="newTransaction.TransactionDate" />
+            </div>
+            <div style="display:flex; flex-direction: column">
+                <label for="transactiondescription">Beskrivning av transaktion</label>
+                <input id="transactiondescription" name="transactiondescription" type="text" @bind-value="newTransaction.Description" />
+            </div>
+            @if (descriptionError)
+            {
+                <div style="color: red;">*Ange beskrivning</div>
+            }
+            <br />
+            <div style="display:flex; flex-direction: column">
+                <select @bind="newTransaction.CategoryId">
+                    @if(newTransaction.CategoryId == null)
+                    {
+                        <option></option>
+                    }
+                    @foreach (var category in AppState.Categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </div>
+            @if (categoryError)
+            {
+                <div style="color: red;">*Ange kategori</div>
+            }
+            <div style="display:flex; flex-direction: column">
+                <label for="transactionamount">Summa</label>
+                <input id="transactionamount" name="transactionamount" type="number" @bind-value="newTransaction.Amount" />
+            </div>
+
+
+
+        </BSModalBody>
+        <BSModalFooter>
+            <BSButton Color="Color.Dark" @onclick="@(() => CreateTransaction())">Skapa transaktion</BSButton>
+            <BSButton Color="Color.Dark" @onclick="@(() => TransactionModal.Hide())">Stäng</BSButton>
+        </BSModalFooter>
+    </BSModal>
+}
 
 @if (AppState.Categories != null && AppState.Categories.Count > 0)
 {
 
-    <h3>Transaktioner</h3>
-    <TransactionHeader FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="AppState.Categories" CurrentCategory="currentCategory" />
+
+    <TransactionHeader ShowTransModal="ShowTransModal" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="AppState.Categories" CurrentCategory="currentCategory" />
 }
 
 @if (AppState.Categories != null && AppState.Categories.Count > 0 && AppState.Transactions != null && AppState.Transactions.Count > 0)
@@ -31,43 +80,7 @@
         </ul>
     </nav>
 }
-@if (AppState.IsAuth)
-{
-    <BSButton Color="Color.Dark" @onclick="@(() => ShowTransModal())">Skapa transaktion</BSButton>
-    <BSModal @ref="TransactionModal">
-        <BSModalHeader OnClick="@(() => TransactionModal.Hide())">Skapa transaktion</BSModalHeader>
-        <BSModalBody>
-            <div style="display:flex; flex-direction: column">
-                <label for="newtransactiondate">Transaktionsdatum</label>
-                <input id="newtransactiondate" name="newtransactiondate" type="date" min="1969-01-01" max="@DateTime.Today.ToShortDateString()" @bind-value="newTransaction.TransactionDate" />
-            </div>
-            <div style="display:flex; flex-direction: column">
-                <label for="transactiondescription">Beskrivning av transaktion</label>
-                <input id="transactiondescription" name="transactiondescription" type="text"  @bind-value="newTransaction.Description" />
-            </div>
-            <br />
-            <div style="display:flex; flex-direction: column">
-                <select @bind="newTransaction.CategoryId">
-                    @foreach (var category in AppState.Categories)
-                    {
-                        <option value="@category.Id">@category.Name</option>
-                    }
-                </select>
-            </div>
-            <div style="display:flex; flex-direction: column">
-                <label for="transactionamount">Summa</label>
-                <input id="transactionamount" name="transactionamount" type="number" @bind-value="newTransaction.Amount" />
-            </div>
 
-
-
-        </BSModalBody>
-        <BSModalFooter>
-            <BSButton Color="Color.Dark" @onclick="@(() => CreateTransaction())">Skapa transaktion</BSButton>
-            <BSButton Color="Color.Dark" @onclick="@(() => TransactionModal.Hide())">Stäng</BSButton>
-        </BSModalFooter>
-    </BSModal>
-}
 @code {
 
     BSModal TransactionModal { get; set; }
@@ -81,6 +94,9 @@
     public Category currentCategory = new Category() { Id = null };
     public List<Transaction> transactions = new List<Transaction>();
     public List<Category> categories = new List<Category>();
+
+    bool descriptionError;
+    bool categoryError;
 
 
     protected override async Task OnInitializedAsync()
@@ -119,7 +135,7 @@
             TransactionDate = DateTime.Today
         };
         TransactionModal.Show();
-}
+    }
 
     private async Task GetCategories()
     {
@@ -205,11 +221,28 @@
     private async void CreateTransaction()
     {
         newTransaction.OwnerId = AppState.User.Id;
-        await http.SendJsonAsync(HttpMethod.Post, "api/transactions", newTransaction);
-        newTransaction = new Transaction();
-        await GetTransactions();
-        TransactionModal.Hide();
-        StateHasChanged();
+        if (newTransaction.Description == null)
+        {
+            descriptionError = true;
+            await Task.Delay(5000);
+            descriptionError = false;
+            StateHasChanged();
+        }
+        else if (newTransaction.CategoryId == null)
+        {
+            categoryError = true;
+            await Task.Delay(5000);
+            categoryError = false;
+            StateHasChanged();
+        }
+        else
+        {
+            await http.SendJsonAsync(HttpMethod.Post, "api/transactions", newTransaction);
+            newTransaction = new Transaction();
+            await GetTransactions();
+            TransactionModal.Hide();
+            StateHasChanged();
+        }
     }
 
     public void SetFromDate(ChangeEventArgs e)

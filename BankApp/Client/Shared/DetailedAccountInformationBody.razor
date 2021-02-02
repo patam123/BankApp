@@ -27,7 +27,7 @@
                                     {
                                         if (transaction.CategoryId.Equals(category.Id) && transaction.TransactionDate >= FromDate && transaction.TransactionDate <= ToDate)
                                         {
-                                            <IndividualTransaction SetCatSum="SetCategorySums" Transaction="transaction" Categories="Categories" />
+                                            <IndividualTransaction IsTransactionPage="false" SetCatSum="SetCategorySums" Transaction="transaction" Categories="Categories" />
                                         }
                                     }
                                 </tbody>

@@ -1,30 +1,38 @@
-﻿<div style="display: flex; justify-content: space-between;">
-    <p style="font-size: 16px">Transaktioner</p>
+﻿@inject AppStateContainer AppState
 
-    <BSDropdown>
-        <BSDropdownToggle Color="Color.Dark">Filtrera</BSDropdownToggle>
-        <BSDropdownMenu>
-            <BSDropdownItem OnClick="(() => SetCurrentCategory.InvokeAsync(null))">Visa alla kategorier</BSDropdownItem>
-            <BSDropdownItem  IsDivider="true"/>
-            @foreach (var category in Categories)
-            {
-                <BSDropdownItem OnClick="(() => SetCurrentCategory.InvokeAsync(category.Id))">@category.Name</BSDropdownItem>
-            }
-        </BSDropdownMenu>
-    </BSDropdown>
-    <BSButton Color="Color.Dark" OnClick="(() => TransactionDateModal.Show())">Ändra tidsintervall</BSButton>
-    <BSModal @ref="TransactionDateModal">
-        <BSModalHeader OnClick="(() => TransactionDateModal.Hide())">Ändra tidsintervall</BSModalHeader>
-        <BSModalBody><DisplayDatesModal SetFromDate="SetFromDate" SetToDate="SetToDate" /></BSModalBody>
-        <BSModalFooter>
-            <BSButton Color="Color.Dark" @onclick="@(() => TransactionDateModal.Hide())">Stäng</BSButton>
-        </BSModalFooter>
-    </BSModal>
-</div>
+
+    <div style="display: flex; justify-content: space-between;">
+        @if (AppState.IsAuth)
+        {
+            <BSButton Color="Color.Dark" @onclick="@ShowTransModal.InvokeAsync">Skapa transaktion  <span style="margin-left: 5px;" class="oi oi-plus"></span></BSButton>
+        }
+
+
+        <BSDropdown>
+            <BSDropdownToggle Color="Color.Dark">Filtrera</BSDropdownToggle>
+            <BSDropdownMenu>
+                <BSDropdownItem OnClick="(() => SetCurrentCategory.InvokeAsync(null))">Visa alla kategorier</BSDropdownItem>
+                <BSDropdownItem IsDivider="true" />
+                @foreach (var category in Categories)
+                {
+                    <BSDropdownItem OnClick="(() => SetCurrentCategory.InvokeAsync(category.Id))">@category.Name</BSDropdownItem>
+                }
+            </BSDropdownMenu>
+        </BSDropdown>
+        <BSButton Color="Color.Dark" OnClick="(() => TransactionDateModal.Show())">Ändra tidsintervall <span style="margin-left: 5px;" class="oi oi-calendar"></span></BSButton>
+        <BSModal @ref="TransactionDateModal">
+            <BSModalHeader OnClick="(() => TransactionDateModal.Hide())">Ändra tidsintervall</BSModalHeader>
+            <BSModalBody><DisplayDatesModal SetFromDate="SetFromDate" SetToDate="SetToDate" /></BSModalBody>
+            <BSModalFooter>
+                <BSButton Color="Color.Dark" @onclick="@(() => TransactionDateModal.Hide())">Stäng</BSButton>
+            </BSModalFooter>
+        </BSModal>
+    </div>
 
 @code {
     BSModal TransactionDateModal { get; set; }
 
+    [Parameter] public EventCallback ShowTransModal { get; set; }
     [Parameter] public List<Category> Categories { get; set; }
     [Parameter] public Category CurrentCategory { get; set; }
     [Parameter] public EventCallback<string> SetCurrentCategory { get; set; }
@@ -33,6 +41,7 @@
     [Parameter] public DateTime ToDate { get; set; }
     [Parameter] public EventCallback<ChangeEventArgs> SetFromDate { get; set; }
     [Parameter] public EventCallback<ChangeEventArgs> SetToDate { get; set; }
+
 
 
 }

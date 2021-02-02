@@ -4,7 +4,7 @@
 </div>
 <div style="display:flex; flex-direction: column">
     <label for="to">Till</label>
-    <input id="to" name="to" type="date" max="@DateTime.Today.ToShortDateString()" @onchange="((e) => SetToDate.InvokeAsync(e))" />
+    <input id="to" name="to" type="date" @onchange="((e) => SetToDate.InvokeAsync(e))" />
 </div>
 
 @code{

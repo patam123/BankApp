@@ -8,23 +8,35 @@
 {
     <h3>Kategorier</h3>
 
-    <div style="display: flex; justify-content:space-between;">
-        <BSCard style="width: 300px" CardType="CardType.Card">
-            <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Lägg till kategori</BSCard>
-            <BSCard CardType="CardType.Body">
+    <div>
+        <BSButton OnClick="(() => NewCategoryModal.Show())" Color="Color.Dark">Skapa ny kategori</BSButton>
+        <br />
+        <BSModal @ref="NewCategoryModal">
+            <BSModalHeader OnClick="@(() => NewCategoryModal.Hide())">Lägg till ny kategori</BSModalHeader>
+            <BSModalBody>
                 <BSForm Model="newCategory" OnSubmit="CreateCategory">
                     <BSFormGroup>
                         <BSLabel>Namn</BSLabel>
                         <BSInput @bind-Value="newCategory.Name" placeholder="Namnge kategori..."></BSInput>
                     </BSFormGroup>
+                    @if (newCategoryNameError)
+                    {
+                        <div style="color: red;">*Ange namn</div>
+                    }
                     <BSFormGroup>
                         <BSLabel>Färg</BSLabel>
                         <BSInput InputType="InputType.Color" @bind-Value="newCategory.Color"></BSInput>
                     </BSFormGroup>
+                    @if (newCategoryColorError)
+                    {
+                        <div style="color: red;">*Ange färg</div>
+                    }
                     <BSButton Color="Color.Dark" ButtonType="ButtonType.Submit">Lägg till</BSButton>
                 </BSForm>
-            </BSCard>
-        </BSCard>
+            </BSModalBody>
+            <BSModalFooter><BSButton Color="Color.Dark" OnClick="@(() => NewCategoryModal.Hide())">Stäng</BSButton></BSModalFooter>
+        </BSModal>
+
 
         <BSCard style="width: 500px" CardType="CardType.Card">
             <BSCard CardType="CardType.Header" HeadingSize="HeadingSize.H4">Befintliga kategorier</BSCard>
@@ -62,42 +74,61 @@
             <BSCard CardType="CardType.Header" Color="Color.Dark">Utgiftsmål</BSCard>
             <BSCard CardType="CardType.Body">
                 <div style="display: flex; justify-content:space-between">
-                    <BSCard CardType="CardType.Card">
-                        <BSCard CardType="CardType.Header">Lägg till utgiftsmål</BSCard>
-                        <BSCard CardType="CardType.Body"></BSCard>
-                        <BSForm Model="newExpenseLimit" OnSubmit="CreateExpenseLimit">
-                            <BSFormGroup>
-                                <BSLabel>Namn</BSLabel>
-                                <BSInput @bind-Value="newExpenseLimit.Name"></BSInput>
-                            </BSFormGroup>
-                            <BSFormGroup>
-                                <BSLabel>Kategori</BSLabel>
-                                <BSInput InputType="InputType.Select" @bind-Value="newExpenseLimit.CategoryId">
-                                    @foreach (var category in AppState.Categories)
-                                        {
-                                        <option value="@category.Id">@category.Name</option>
-                                        }
-                                </BSInput>
-                            </BSFormGroup>
-                            <BSFormGroup>
-                                <BSLabel>Summa</BSLabel>
-                                <BSInput InputType="InputType.Number" @bind-Value="newExpenseLimit.Amount"></BSInput>
-                            </BSFormGroup>
-                            <BSFormGroup>
-                                <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Välj datum</BSButton>
-                                <BSModal @ref="DateModal">
-                                    <BSModalHeader OnClick="@(() => DateModal.Hide())">Ändra tidsintervall</BSModalHeader>
-                                    <BSModalBody>
-                                        <DisplayDatesModal SetFromDate="SetFromDate" SetToDate="SetToDate" />
-                                    </BSModalBody>
-                                    <BSModalFooter>
-                                        <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Hide())">Stäng</BSButton>
-                                    </BSModalFooter>
-                                </BSModal>
-                            </BSFormGroup>
-                            <BSButton ButtonType="ButtonType.Submit">Lägg till</BSButton>
-                        </BSForm>
-                    </BSCard>
+                    <BSButton Color="Color.Dark" OnClick="@(() => NewExpenseLimitModal.Show())">Lägg till nytt utgiftsmål</BSButton>
+                    <BSModal @ref="NewExpenseLimitModal">
+                        <BSModalHeader OnClick="@(() => NewExpenseLimitModal.Hide())">Skapa nytt utgiftsmål</BSModalHeader>
+                        <BSModalBody>
+                            <BSForm Model="newExpenseLimit" OnSubmit="CreateExpenseLimit">
+                                <BSFormGroup>
+                                    <BSLabel>Namn</BSLabel>
+                                    <BSInput @bind-Value="newExpenseLimit.Name"></BSInput>
+                                </BSFormGroup>
+                                @if (expenseLimitNameError)
+                                {
+                                    <div style="color: red">*Ange namn</div>
+                                }
+                                <BSFormGroup>
+                                    <BSLabel>Kategori</BSLabel>
+                                    <BSInput InputType="InputType.Select" @bind-Value="newExpenseLimit.CategoryId">
+                                        @foreach (var category in AppState.Categories)
+                                            {
+                                            <option value="@category.Id">@category.Name</option>
+                                            }
+                                    </BSInput>
+                                </BSFormGroup>
+                                @if (expenseLimitCategoryError)
+                                {
+                                    <div style="color: red;">*Ange kategori</div>
+                                }
+                                <BSFormGroup>
+                                    <BSLabel>Summa</BSLabel>
+                                    <BSInput InputType="InputType.Number" @bind-Value="newExpenseLimit.Amount"></BSInput>
+                                </BSFormGroup>
+                                <BSFormGroup>
+                                    <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Välj datum</BSButton>
+                                    <BSModal @ref="DateModal">
+                                        <BSModalHeader OnClick="@(() => DateModal.Hide())">Ändra tidsintervall</BSModalHeader>
+                                        <BSModalBody>
+                                            <DisplayDatesModal SetFromDate="SetFromDate" SetToDate="SetToDate" />
+                                        </BSModalBody>
+                                        <BSModalFooter>
+                                            <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Hide())">Stäng</BSButton>
+                                        </BSModalFooter>
+                                    </BSModal>
+                                    @if (expenseLimitDateError)
+                                    {
+                                        <div style="color: red">*Ange datum</div>
+                                    }
+                                </BSFormGroup>
+                                <br />
+                                <BSButton Color="Color.Dark" ButtonType="ButtonType.Submit">Lägg till</BSButton>
+                            </BSForm>
+                        </BSModalBody>
+                        <BSModalFooter><BSButton Color="Color.Dark" OnClick="@(() => NewExpenseLimitModal.Hide())">Stäng</BSButton></BSModalFooter>
+                    </BSModal>
+
+
+
                     <BSCard CardType="CardType.Card">
                         <BSCard CardType="CardType.Header">Redigera utgiftsmål</BSCard>
                         <BSCard CardType="CardType.Body">
@@ -162,6 +193,9 @@
 }
 
 @code {
+
+    BSModal NewCategoryModal { get; set; }
+    BSModal NewExpenseLimitModal { get; set; }
     BSModal DateModal { get; set; }
     Category newCategory = new Category();
     ExpenseLimit newExpenseLimit = new ExpenseLimit();
@@ -169,6 +203,12 @@
     List<Category> categories = new List<Category>();
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+
+    bool newCategoryColorError;
+    bool newCategoryNameError;
+    bool expenseLimitDateError;
+    bool expenseLimitCategoryError;
+    bool expenseLimitNameError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -259,12 +299,29 @@
     private async Task CreateCategory()
     {
         newCategory.OwnerId = AppState.User.Id;
-        //skicka till api => databas
-        await http.SendJsonAsync(HttpMethod.Post, "api/categories", newCategory);
-        newCategory = new Category();
-        StartDate = new DateTime();
-        EndDate = new DateTime();
-        await GetCategories();
+        if (newCategory.Color == null)
+        {
+            newCategoryColorError = true;
+            await Task.Delay(5000);
+            newCategoryColorError = false;
+            StateHasChanged();
+        }
+        else if (newCategory.Name == null)
+        {
+            newCategoryNameError = true;
+            await Task.Delay(5000);
+            newCategoryNameError = false;
+            StateHasChanged();
+        }
+        else
+        {
+            //skicka till api => databas
+            await http.SendJsonAsync(HttpMethod.Post, "api/categories", newCategory);
+            newCategory = new Category();
+            StartDate = new DateTime();
+            EndDate = new DateTime();
+            await GetCategories();
+        }
 
     }
 
@@ -274,9 +331,34 @@
         newExpenseLimit.EndDate = EndDate;
         newExpenseLimit.OwnerId = AppState.User.Id;
 
-        await http.SendJsonAsync(HttpMethod.Post, "api/expenselimits", newExpenseLimit);
-        newExpenseLimit = new ExpenseLimit();
-        await GetExpenseLimits();
+        if (newExpenseLimit.Name == null)
+        {
+            expenseLimitNameError = true;
+            await Task.Delay(5000);
+            expenseLimitNameError = false;
+            StateHasChanged();
+        }
+        else if (newExpenseLimit.CategoryId == null)
+        {
+            expenseLimitCategoryError = true;
+            await Task.Delay(5000);
+            expenseLimitCategoryError = false;
+            StateHasChanged();
+        }
+        else if (newExpenseLimit.StartDate.ToShortDateString() == "0001-01-01" || newExpenseLimit.EndDate.ToShortDateString() == "0001-01-01")
+        {
+            expenseLimitDateError = true;
+            await Task.Delay(5000);
+            expenseLimitDateError = false;
+            StateHasChanged();
+        }
+        else
+        {
+            await http.SendJsonAsync(HttpMethod.Post, "api/expenselimits", newExpenseLimit);
+            newExpenseLimit = new ExpenseLimit();
+            await GetExpenseLimits();
+            StateHasChanged();
+        }
     }
 
     private async Task UpdateExpenseLimit(ExpenseLimit expenseLimit)
@@ -299,7 +381,7 @@
     {
         await http.DeleteAsync("api/expenselimits/" + id);
         await GetExpenseLimits();
-        //StateHasChanged();
+        StateHasChanged();
     }
 
     private async Task GetTransactions()

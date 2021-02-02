@@ -1,6 +1,6 @@
 ﻿<tr style="background: linear-gradient(180deg, @(Transaction.CategoryId != null ? Categories.Find(x => x.Id.Equals(Transaction.CategoryId)).Color : "#FFFFFF") 0%, rgba(228, 80, 80, 0) 120%);">
     <td>@Transaction.TransactionDate.ToShortDateString()</td>
-    <td>@Transaction.Description</td>
+    <td>@(Transaction.Description != null ? Transaction.Description : "")</td>
     <td>
         <select class="btn btn-dark" @bind="Transaction.CategoryId">
             @if (Transaction.CategoryId == null)
@@ -15,6 +15,10 @@
         </select>
     </td>
     <td>@Transaction.Amount.ToString() kr</td>
+    @if (IsTransactionPage)
+    {
+        <td><BSButton OnClick="@(() => DeleteTransaction(Transaction.Id))" Color="Color.Danger">Radera</BSButton></td>
+    }
 </tr>
 
 

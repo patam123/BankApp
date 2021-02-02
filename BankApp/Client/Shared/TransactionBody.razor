@@ -12,7 +12,7 @@
         {
             if (GetCategoryTransactions()[i].TransactionDate >= FromDate && GetCategoryTransactions()[i].TransactionDate <= ToDate)
             {
-                <IndividualTransaction Transaction="GetCategoryTransactions()[i]" Categories="Categories" />
+                <IndividualTransaction IsTransactionPage="true" Transaction="GetCategoryTransactions()[i]" Categories="Categories" />
             }
         }
     </tbody>

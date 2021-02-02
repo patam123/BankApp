@@ -17,11 +17,13 @@ namespace BankApp.Client.Shared
 
         }
 
+        [Parameter] public bool IsTransactionPage { get; set; }
         [Parameter] public Transaction Transaction { get; set; }
         [Parameter] public List<Category> Categories { get; set; }
         [Parameter] public EventCallback SetCatSum { get; set; }
 
         [Inject] public HttpClient Http { get; set; }
+        [Inject] AppStateContainer AppState { get; set; }
         protected override void OnInitialized()
         {
 
@@ -38,6 +40,13 @@ namespace BankApp.Client.Shared
             await Http.SendJsonAsync(HttpMethod.Put, "api/transactions", transaction);
             // => skicka till api.
             StateHasChanged();
+        }
+
+        private async Task DeleteTransaction(string id)
+        {
+            await Http.DeleteAsync("api/transactions/" + id);
+            var updatedTransactions = await Http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
+            AppState.UpdateTransactions(this, updatedTransactions);
         }
     }
 }

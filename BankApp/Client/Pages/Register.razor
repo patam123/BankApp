@@ -5,7 +5,7 @@
 @using System.Text
 
 
-<BSForm Model="registrationModel" OnValidSubmit="(() => OnSubmit())">
+<BSForm Model="registrationModel" OnSubmit="(() => OnSubmit())">
     <BSFormGroup>
         <BSLabel For="firstname">Förnamn</BSLabel>
         <BSInput T="string" Id="firstname" InputType="InputType.Text" @bind-Value="registrationModel.FirstName" />
@@ -29,59 +29,110 @@
     <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Registrera</BSButton>
 </BSForm>
 
+<BSModal @ref="RegisterModal">
+    <BSModalHeader OnClick="@(() => RegisterModal.Hide())">@errorHeader</BSModalHeader>
+    <BSModalBody>@errorMessage</BSModalBody>
+    <BSModalFooter>
+        <BSButton Color="Color.Dark" @onclick="@(() => RegisterModal.Hide())">Stäng</BSButton>
+    </BSModalFooter>
+</BSModal>
+
 <NavLink href="/">Har du redan ett konto? Logga in</NavLink>
 
 @code {
 
+
+    BSModal RegisterModal;
+    private string errorHeader;
+    private string errorMessage;
     RegistrationModel registrationModel = new RegistrationModel();
+
+    private void ShowError(string message, string header)
+    {
+        errorMessage = message;
+        errorHeader = header;
+        RegisterModal.Show();
+    }
 
     private async Task OnSubmit()
     {
-        if (registrationModel.Password.Equals(registrationModel.RepeatPassword))
+        try
         {
-            //skicka resultat till api  =>
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append(registrationModel.FirstName.Substring(0, 1).ToUpper());
-            var firstName = sb.Append(registrationModel.FirstName.Substring(1).ToLower());
-            registrationModel.FirstName = firstName.ToString();
-            sb.Clear();
-
-            sb.Append(registrationModel.LastName.Substring(0, 1).ToUpper());
-            var lastName = sb.Append(registrationModel.LastName.Substring(1).ToLower());
-            registrationModel.LastName = lastName.ToString();
-            sb.Clear();
-
-
-            Console.WriteLine($"{registrationModel.FirstName} {registrationModel.LastName} {registrationModel.Email} {registrationModel.Password} {registrationModel.RepeatPassword}");
-            User user = new User()
+            if (registrationModel.Password.Length < 8)
             {
-                Email = registrationModel.Email,
-                Password = registrationModel.Password,
-                FirstName = registrationModel.FirstName,
-                LastName = registrationModel.LastName,
-            };
+                ShowError("Ditt lösenord måste innehålla minst 8 tecken.", "Svagt lösenord");
+                return;
+            }
 
-            var userId = await RegisterUser(user);
-            Console.WriteLine(userId);
-            if (userId != "A user with this email already exists.")
+
+            if (registrationModel.Password.Equals(registrationModel.RepeatPassword))
             {
-                user.Id = userId;
-                await CreateUser(user);
+                //skicka resultat till api  =>
+
+                StringBuilder sb = new StringBuilder();
+
+                if (registrationModel.FirstName != null)
+                {
+                    sb.Append(registrationModel.FirstName.Substring(0, 1).ToUpper());
+                    var firstName = sb.Append(registrationModel.FirstName.Substring(1).ToLower());
+                    registrationModel.FirstName = firstName.ToString();
+                    sb.Clear();
+                }
+                else
+                {
+                    ShowError("Du måste ange ett förnamn.", "Förnamn");
+                    return;
+                }
+
+                if (registrationModel.LastName != null)
+                {
+                    sb.Append(registrationModel.LastName.Substring(0, 1).ToUpper());
+                    var lastName = sb.Append(registrationModel.LastName.Substring(1).ToLower());
+                    registrationModel.LastName = lastName.ToString();
+                    sb.Clear();
+                }
+                else
+                {
+                    ShowError("Du måste ange ett efternamn.", "Efternamn");
+                    return;
+                }
+
+
+
+                Console.WriteLine($"{registrationModel.FirstName} {registrationModel.LastName} {registrationModel.Email} {registrationModel.Password} {registrationModel.RepeatPassword}");
+                User user = new User()
+                {
+                    Email = registrationModel.Email,
+                    Password = registrationModel.Password,
+                    FirstName = registrationModel.FirstName,
+                    LastName = registrationModel.LastName,
+                };
+
+                var userId = await RegisterUser(user);
+                Console.WriteLine(userId);
+                if (userId != "A user with this email already exists.")
+                {
+                    user.Id = userId;
+                    await CreateUser(user);
+                }
+                else
+                {
+                    ShowError("Det finns redan en användare med den mailadressen.", "Användaren existerar");
+                }
+                StateHasChanged();
             }
             else
             {
-                // meddela fel: userId
+                ShowError("Lösenorden måste stämma överens.", "Felaktigt lösenord");
+                return;
             }
-            StateHasChanged();
-            //registrationModel = new RegistrationModel();
-            //navManager.NavigateTo("/login");
         }
-        else
+        catch (NullReferenceException)
         {
-            //alerta.
-        }
 
+            ShowError("Samtliga fält måste fyllas i.", "Fyll i fälten");
+            return;
+        }
 
     }
 

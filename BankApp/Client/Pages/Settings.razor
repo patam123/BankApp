@@ -14,15 +14,15 @@
     <br />
     <BSForm Model="registrationModel" OnValidSubmit="(() => UpdateUser())">
         <BSFormGroup>
-            <BSLabel For="firstname">Redigera Förnamn</BSLabel>
+            <BSLabel For="firstname">Förnamn</BSLabel>
             <BSInput T="string" Id="firstname" InputType="InputType.Text" @bind-Value="registrationModel.FirstName" />
         </BSFormGroup>
         <BSFormGroup>
-            <BSLabel For="lastname">Redigera Efternamn</BSLabel>
+            <BSLabel For="lastname">Efternamn</BSLabel>
             <BSInput T="string" Id="lastname" InputType="InputType.Text" @bind-Value="registrationModel.LastName" />
         </BSFormGroup>
         <BSFormGroup>
-            <BSLabel For="email">Redigera Email</BSLabel>
+            <BSLabel For="email">Email</BSLabel>
             <BSInput T="string" Id="email" InputType="InputType.Email" @bind-Value="registrationModel.Email" />
         </BSFormGroup>
         <BSFormGroup>
