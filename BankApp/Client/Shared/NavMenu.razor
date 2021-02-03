@@ -27,6 +27,11 @@
                 </NavLink>
             </li>
             <li class="nav-item px-3">
+                <NavLink class="nav-link" href="expenses">
+                    <span class="oi oi-target" aria-hidden="true"></span> Utgiftsmål
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
                 <NavLink class="nav-link" href="settings">
                     <span class="oi oi-person" aria-hidden="true"></span> Profilinställningar
                 </NavLink>
@@ -52,7 +57,7 @@
     private async void Logout()
     {
         await http.SendJsonAsync(HttpMethod.Post, "/user/logout", null);
-        AppState.SetAuthState(this, AppState.User, false);
+        AppState.SetAuthState(this, null, false);
     }
 
     protected override void OnInitialized()

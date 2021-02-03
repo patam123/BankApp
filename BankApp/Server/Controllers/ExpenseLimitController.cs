@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BankApp.Server.Controllers
 {
-    [Route("api/expenselimits")]
+    
     [ApiController]
     public class ExpenseLimitController : ControllerBase
     {
@@ -18,7 +18,8 @@ namespace BankApp.Server.Controllers
         Firestore firestore = new Firestore();
 
         // GET api/<ExpenseLimitController>/5
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("api/expenselimits/{id}")]
         public Task<List<ExpenseLimit>> Get(string id)
         {
             return firestore.GetExpenseLimits(id);
@@ -26,6 +27,7 @@ namespace BankApp.Server.Controllers
 
         // POST api/<ExpenseLimitController>
         [HttpPost]
+        [Route("api/expenselimits")]
         public void Post([FromBody] ExpenseLimit expenseLimit)
         {
             firestore.AddExpenseLimit(expenseLimit);
@@ -33,16 +35,25 @@ namespace BankApp.Server.Controllers
 
         // PUT api/<ExpenseLimitController>/5
         [HttpPut]
+        [Route("api/expenselimits")]
         public void Put([FromBody] ExpenseLimit expenseLimit)
         {
             firestore.UpdateExpenseLimit(expenseLimit);
         }
 
         // DELETE api/<ExpenseLimitController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete]
+        [Route("api/expenselimits/{id}")]
         public void Delete(string id)
         {
             firestore.DeleteExpenseLimit(id);
+        }
+
+        [HttpDelete]
+        [Route("api/deleteallexpenselimits/{id}")]
+        public void DeleteAll(string id)
+        {
+            firestore.DeleteAllExpenseLimits(id);
         }
     }
 }

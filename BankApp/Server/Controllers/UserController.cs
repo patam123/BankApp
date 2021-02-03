@@ -47,15 +47,14 @@ namespace BankApp.Server.Controllers
             return updateResult;
         }
 
-        [HttpDelete]
-        [Route("/user/delete")]
-        public async Task<string> Delete([FromBody] User user)
+        [HttpDelete("{id}")]
+        public async Task<string> Delete(string id)
         {
             Response.Cookies.Delete("session");
-            var authResult = await fireAuth.DeleteUser(user.Id);
+            var authResult = await fireAuth.DeleteUser(id);
             if (!string.IsNullOrEmpty(authResult))
             {
-                return await firestore.DeleteUser(user.Id);
+                return await firestore.DeleteUser(id);
             }
             return authResult;
         }

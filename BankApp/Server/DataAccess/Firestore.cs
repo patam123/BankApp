@@ -16,7 +16,7 @@ namespace BankApp.Server.DataAccess
         public Firestore()
         {
             /// Enter your file path to your own API-key.
-            string filepath = @"C:\Users\patri\Downloads\bankapp-2782c-1efd18eca9b1.json";
+            string filepath = @"bankapp-2782c-1efd18eca9b1.json";
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", filepath);
             projectId = "bankapp-2782c";
             firestore = FirestoreDb.Create(projectId);
@@ -101,6 +101,36 @@ namespace BankApp.Server.DataAccess
 
         }
 
+        public async void DeleteAllCategories(string id)
+        {
+            try
+            {
+                var snapshot = await firestore.Collection("categories").GetSnapshotAsync();
+                var documents = snapshot.Documents;
+
+                var userDocuments = documents.Where(x => x.GetValue<string>("OwnerId") == id);
+
+                while (userDocuments.Count() > 0)
+                {
+                    foreach (var document in userDocuments)
+                    {
+                        await document.Reference.DeleteAsync();
+                    }
+
+                    snapshot = await firestore.Collection("categories").GetSnapshotAsync();
+                    documents = snapshot.Documents;
+
+                    userDocuments = documents.Where(x => x.GetValue<string>("OwnerId") == id);
+                }
+
+            }
+            catch (Exception)
+            {
+
+                Console.WriteLine("Något gick fel");
+            }
+        }
+
         // Transaction Methods
 
         public async Task<List<Shared.Entities.Transaction>> GetTransactions(string userId)
@@ -159,7 +189,7 @@ namespace BankApp.Server.DataAccess
 
                 throw;
             }
-            
+
         }
 
         public async void UpdateTransaction(Shared.Entities.Transaction transaction)
@@ -188,6 +218,36 @@ namespace BankApp.Server.DataAccess
             {
 
                 throw;
+            }
+        }
+
+        public async void DeleteAllTransactions(string id)
+        {
+            try
+            {
+                var snapshot = await firestore.Collection("transactions").GetSnapshotAsync();
+                var documents = snapshot.Documents;
+
+                var userDocuments = documents.Where(x => x.GetValue<string>("OwnerId") == id);
+
+                while (userDocuments.Count() > 0)
+                {
+                    foreach (var document in userDocuments)
+                    {
+                        await document.Reference.DeleteAsync();
+                    }
+
+                    snapshot = await firestore.Collection("transactions").GetSnapshotAsync();
+                    documents = snapshot.Documents;
+
+                    userDocuments = documents.Where(x => x.GetValue<string>("OwnerId") == id);
+                }
+
+            }
+            catch (Exception)
+            {
+
+                Console.WriteLine("Något gick fel");
             }
         }
 
@@ -248,7 +308,7 @@ namespace BankApp.Server.DataAccess
 
                 throw;
             }
-            
+
         }
 
         public async void AddExpenseLimit(ExpenseLimit expenseLimit)
@@ -297,6 +357,36 @@ namespace BankApp.Server.DataAccess
             {
 
                 throw;
+            }
+        }
+
+        public async void DeleteAllExpenseLimits(string id)
+        {
+            try
+            {
+                var snapshot = await firestore.Collection("expenseLimits").GetSnapshotAsync();
+                var documents = snapshot.Documents;
+
+                var userDocuments = documents.Where(x => x.GetValue<string>("OwnerId") == id);
+
+                while (userDocuments.Count() > 0)
+                {
+                    foreach (var document in userDocuments)
+                    {
+                        await document.Reference.DeleteAsync();
+                    }
+
+                    snapshot = await firestore.Collection("expenseLimits").GetSnapshotAsync();
+                    documents = snapshot.Documents;
+
+                    userDocuments = documents.Where(x => x.GetValue<string>("OwnerId") == id);
+                }
+
+            }
+            catch (Exception)
+            {
+
+                Console.WriteLine("Något gick fel");
             }
         }
 

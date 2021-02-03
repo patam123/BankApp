@@ -10,14 +10,15 @@ using System.Threading.Tasks;
 
 namespace BankApp.Server.Controllers
 {
-    [Route("api/categories")]
+    //[Route("api/categories")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
 
         Firestore firestore = new Firestore();
         // GET: api/categories/{id}
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("api/categories/{id}")]
         public Task<List<Category>> Get(string id)
         {
             return firestore.GetAllCategories(id);
@@ -25,6 +26,7 @@ namespace BankApp.Server.Controllers
 
         // POST: api/categories
         [HttpPost]
+        [Route("api/categories")]
         public void Post([FromBody] Category category)
         {
             firestore.AddCategory(category);
@@ -32,6 +34,7 @@ namespace BankApp.Server.Controllers
 
         // PUT: api/categories
         [HttpPut]
+        [Route("api/categories")]
         public void Put([FromBody] Category category)
         {
             firestore.UpdateCategory(category);
@@ -39,10 +42,18 @@ namespace BankApp.Server.Controllers
 
 
         // DELETE api/categories/5
-        [HttpDelete("{id}")]
+        [HttpDelete]
+        [Route("api/categories/{id}")]
         public void Delete(string id)
         {
             firestore.DeleteCategory(id);
+        }
+        
+        [HttpDelete]
+        [Route("api/deleteallcategories/{id}")]
+        public void DeleteAll(string id)
+        {
+            firestore.DeleteAllCategories(id);
         }
     }
 }

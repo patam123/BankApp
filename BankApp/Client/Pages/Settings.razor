@@ -33,12 +33,31 @@
             <BSLabel For="repeatpassword">Upprepa nytt lösenord</BSLabel>
             <BSInput T="string" Id="repeatpassword" InputType="InputType.Password" @bind-Value="registrationModel.RepeatPassword" />
         </BSFormGroup>
-        <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Spara profil</BSButton>
+        <div style="display: flex; justify-content: space-between">
+            <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Spara profil</BSButton>
+            <BSButton Color="Color.Dark" OnClick="@(() => DeleteUserModal.Show())">Ta bort konto</BSButton>
+        </div>
     </BSForm>
+    <BSModal @ref="DeleteUserModal">
+        <BSModalHeader OnClick="@(() => DeleteUserModal.Hide())">Bekräfta kontoborttagning</BSModalHeader>
+        <BSModalBody>Vill du verkligen ta bort ditt konto?</BSModalBody>
+        <BSModal @ref="DeleteErrorModal">
+            <BSModalHeader OnClick="@(() => DeleteErrorModal.Hide())">Fel</BSModalHeader>
+            <BSModalBody>Något gick fel. Användaren kunde inte raderas.</BSModalBody>
+            <BSModalFooter><BSButton Color="Color.Dark" OnClick="@(() => DeleteErrorModal.Hide())">OK</BSButton></BSModalFooter>
+        </BSModal>
+        <BSModalFooter>
+            <BSButton OnClick="@(() => DeleteUser())" Color="Color.Danger">OK</BSButton>
+            <BSButton OnClick="@(() => DeleteUserModal.Hide())" Color="Color.Dark">Avbryt</BSButton>
+        </BSModalFooter>
+    </BSModal>
 }
 
 @code {
 
+    BSModal DeleteUserModal;
+    BSModal DeleteErrorModal;
+    bool deleteError;
     RegistrationModel registrationModel = new RegistrationModel();
 
     private async Task<string> UpdateUser()
@@ -106,6 +125,27 @@
         registrationModel.RepeatPassword = "";
         StateHasChanged();
 
+    }
+
+    private async Task DeleteUser()
+    {
+        var id = AppState.User.Id;
+        var response = await http.DeleteAsync("api/user/" + id);
+        var responseMessage = await response.Content.ReadAsStringAsync();
+        if (responseMessage == "Användaren raderades.")
+        {
+            await http.DeleteAsync("api/deleteallcategories/" + id);
+            await http.DeleteAsync("api/deletealltransactions/" + id);
+            await http.DeleteAsync("api/deleteallexpenselimits/" + id);
+            await http.PostAsync("/user/logout", null);
+            DeleteUserModal.Hide();
+            AppState.SetAuthState(this, null, false);
+            navManager.NavigateTo("/");
+        }
+        else
+        {
+            DeleteErrorModal.Show();
+        }
     }
 
     private async Task<UserResponse> ValidateSession()

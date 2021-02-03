@@ -26,7 +26,7 @@ namespace BankApp.Server
         {
             FirebaseApp.Create(new AppOptions() 
             { 
-                Credential = GoogleCredential.FromFile(@"C:\Users\patri\Downloads\bankapp-2782c-c3b4e363ce02.json"),
+                Credential = GoogleCredential.FromFile(@"bankapp-2782c-c3b4e363ce02.json"),
             });
             services.AddControllersWithViews();
             services.AddRazorPages();

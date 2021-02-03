@@ -125,7 +125,6 @@
     private async Task GetUser(string id)
     {
         var user = await http.GetJsonAsync<User>("api/user/" + id);
-        Console.WriteLine(user.Id);
         AppState.SetAuthState(this, user, true);
     }
 

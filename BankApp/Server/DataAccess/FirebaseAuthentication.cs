@@ -92,9 +92,14 @@ namespace BankApp.Server.DataAccess
         {
             try
             {
-                var filepath = @"C:\Users\patri\Desktop\bankapikey.txt";
+                var filepath = @"firebase.json";
 
-                var apiKey = File.ReadAllText(filepath);
+                var apiKeyFile = File.ReadAllText(filepath);
+
+                var apiKeyDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(apiKeyFile);
+
+                string apiKey; 
+                apiKeyDictionary.TryGetValue("KEY", out apiKey);
 
                 var http = new HttpClient();
 
