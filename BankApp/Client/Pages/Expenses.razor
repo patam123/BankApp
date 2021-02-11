@@ -10,7 +10,7 @@
     <h3>Utgiftsmål</h3>
 
     <div>
-        <BSButton Color="Color.Dark" OnClick="@(() => NewExpenseLimitModal.Show())">Lägg till nytt utgiftsmål <span class="oi oi-plus" style="margin-left: 5px"></span></BSButton>
+        <BSButton Color="Color.Dark" OnClick="@(() => ShowNewExpenseModal())">Lägg till nytt utgiftsmål <span class="oi oi-plus" style="margin-left: 5px"></span></BSButton>
         <br />
         <BSModal @ref="NewExpenseLimitModal">
             <BSModalHeader OnClick="@(() => NewExpenseLimitModal.Hide())">Skapa nytt utgiftsmål</BSModalHeader>
@@ -19,11 +19,12 @@
                     <BSFormGroup>
                         <BSLabel>Namn</BSLabel>
                         <BSInput @bind-Value="newExpenseLimit.Name"></BSInput>
+                        @if (expenseLimitNameError)
+                        {
+                            <div style="color: red">*Ange namn</div>
+                        }
                     </BSFormGroup>
-                    @if (expenseLimitNameError)
-                    {
-                        <div style="color: red">*Ange namn</div>
-                    }
+
                     <BSFormGroup>
                         <BSLabel>Kategori</BSLabel>
                         <BSInput InputType="InputType.Select" @bind-Value="newExpenseLimit.CategoryId">
@@ -32,11 +33,12 @@
                                 <option value="@category.Id">@category.Name</option>
                                 }
                         </BSInput>
+                        @if (expenseLimitCategoryError)
+                        {
+                            <div style="color: red;">*Ange kategori</div>
+                        }
                     </BSFormGroup>
-                    @if (expenseLimitCategoryError)
-                    {
-                        <div style="color: red;">*Ange kategori</div>
-                    }
+
                     <BSFormGroup>
                         <BSLabel>Summa</BSLabel>
                         <BSInput InputType="InputType.Number" @bind-Value="newExpenseLimit.Amount"></BSInput>
@@ -63,11 +65,11 @@
             </BSModalBody>
             <BSModalFooter><BSButton Color="Color.Dark" OnClick="@(() => NewExpenseLimitModal.Hide())">Stäng</BSButton></BSModalFooter>
         </BSModal>
-        <br/>
+        <br />
 
 
         <BSCard CardType="CardType.Card">
-            <BSCard CardType="CardType.Header">Redigera utgiftsmål</BSCard>
+            <BSCard CardType="CardType.Header">Befintliga utgiftsmål</BSCard>
             <BSCard CardType="CardType.Body">
                 @if (AppState.ExpenseLimits != null && AppState.ExpenseLimits.Count() > 0)
                 {
@@ -94,14 +96,14 @@
                                     <BSInput InputType="InputType.Number" @bind-Value="editExpenseLimit.Amount"></BSInput>
                                 </BSFormGroup>
                                 <BSFormGroup>
-                                    <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Välj datum</BSButton>
-                                    <BSModal @ref="DateModal">
-                                        <BSModalHeader OnClick="@(() => DateModal.Hide())">Ändra tidsintervall</BSModalHeader>
+                                    <BSButton Color="Color.Dark" @onclick="@(() => EditDateModal.Show())">Välj datum</BSButton>
+                                    <BSModal @ref="EditDateModal">
+                                        <BSModalHeader OnClick="@(() => EditDateModal.Hide())">Ändra tidsintervall</BSModalHeader>
                                         <BSModalBody>
                                             <DisplayDatesModal SetFromDate="SetFromDate" SetToDate="SetToDate" />
                                         </BSModalBody>
                                         <BSModalFooter>
-                                            <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Hide())">Stäng</BSButton>
+                                            <BSButton Color="Color.Dark" @onclick="@(() => EditDateModal.Hide())">Stäng</BSButton>
                                         </BSModalFooter>
                                     </BSModal>
                                 </BSFormGroup>
@@ -114,10 +116,13 @@
                     foreach (var expenseLimit in AppState.ExpenseLimits)
                     {
                         <div style="display: flex; justify-content:space-between; border-bottom: 1px solid black;">
-                            <p style="display: flex;">@expenseLimit.Name</p>
+                            <div style="display: flex;">
+                                <p style="margin-right: 10px;">@expenseLimit.Name</p>
+                                <p>@expenseLimit.Amount kr</p>
+                            </div>
                             <div>
                                 <BSButton Color="Color.Dark" OnClick="(() => ShowEditExpenseModal(expenseLimit))">Redigera</BSButton>
-                                <BSButton Color="Color.Danger" OnClick="(() => RemoveExpenseLimit(expenseLimit.Id))">Ta bort</BSButton> @*öppna modal => ta bort i modal*@
+                                <BSButton Color="Color.Danger" OnClick="(() => ShowRemoveModal(expenseLimit.Id))">Ta bort</BSButton>
                             </div>
                         </div>
 
@@ -126,21 +131,39 @@
             </BSCard>
 
         </BSCard>
+        <BSModal @ref="DeleteExpenseLimitModal">
+            <BSModalHeader OnClick="(() => DeleteExpenseLimitModal.Hide())">Ta bort utgiftsmål</BSModalHeader>
+            <BSModalBody>Vill du verkligen ta bort detta utgiftsmål?</BSModalBody>
+            <BSModalFooter>
+                <BSButton Color="Color.Danger" OnClick="(() => RemoveExpenseLimit())">Bekräfta</BSButton>
+                <BSButton OnClick="(() => DeleteExpenseLimitModal.Hide())" Color="Color.Dark">Avbryt</BSButton>
+            </BSModalFooter>
+        </BSModal>
     </div>
 }
 
 @code {
+    BSModal DeleteExpenseLimitModal { get; set; }
     BSModal EditExpenseLimitModal { get; set; }
     BSModal NewExpenseLimitModal { get; set; }
     ExpenseLimit editExpenseLimit = new ExpenseLimit();
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     BSModal DateModal { get; set; }
+    BSModal EditDateModal { get; set; }
     ExpenseLimit newExpenseLimit = new ExpenseLimit();
+
+    string deleteExpenseLimitId;
 
     bool expenseLimitDateError;
     bool expenseLimitCategoryError;
     bool expenseLimitNameError;
+
+    private void ShowNewExpenseModal()
+    {
+        newExpenseLimit.CategoryId = "nm5tXgPCOwfavR9dbF2w";
+        NewExpenseLimitModal.Show();
+    }
 
     private void ShowEditExpenseModal(ExpenseLimit expenseLimit)
     {
@@ -154,7 +177,6 @@
         var day = int.Parse(e.Value.ToString().Substring(8, 2));
 
         StartDate = new DateTime(year, month, day);
-        Console.WriteLine(StartDate);
     }
 
     public void SetToDate(ChangeEventArgs e)
@@ -164,7 +186,6 @@
         var day = int.Parse(e.Value.ToString().Substring(8, 2));
 
         EndDate = new DateTime(year, month, day);
-        Console.WriteLine(EndDate);
     }
 
     private async Task CreateExpenseLimit()
@@ -201,6 +222,7 @@
             await GetExpenseLimits();
             StartDate = new DateTime();
             EndDate = new DateTime();
+            NewExpenseLimitModal.Hide();
             StateHasChanged();
         }
     }
@@ -221,11 +243,16 @@
         await http.SendJsonAsync(HttpMethod.Put, "api/expenselimits", expenseLimit);
         EditExpenseLimitModal.Hide();
     }
-
-    private async Task RemoveExpenseLimit(string id)
+    private void ShowRemoveModal(string id)
     {
-        await http.DeleteAsync("api/expenselimits/" + id);
+        deleteExpenseLimitId = id;
+        DeleteExpenseLimitModal.Show();
+    }
+    private async void RemoveExpenseLimit()
+    {
+        await http.DeleteAsync("api/expenselimits/" + deleteExpenseLimitId);
         await GetExpenseLimits();
+        DeleteExpenseLimitModal.Hide();
         StateHasChanged();
     }
 
@@ -253,7 +280,6 @@
             {
                 Console.WriteLine("error");
                 navManager.NavigateTo("/");
-                //throw;
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿@inject AppStateContainer AppState
 @inject HttpClient http
+@inject NavigationManager navManager
 @implements IDisposable
 
     <div class="top-row pl-4 navbar navbar-dark">
@@ -37,7 +38,7 @@
                 </NavLink>
             </li>
             <li class="nav-item px-3">
-                <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="Logout">
+                <NavLink style="cursor: pointer" class="nav-link" @onclick="Logout">
                     <span class="oi oi-account-logout" aria-hidden="true"></span> Logga ut
                 </NavLink>
             </li>
@@ -58,6 +59,7 @@
     {
         await http.SendJsonAsync(HttpMethod.Post, "/user/logout", null);
         AppState.SetAuthState(this, null, false);
+        navManager.NavigateTo("/");
     }
 
     protected override void OnInitialized()

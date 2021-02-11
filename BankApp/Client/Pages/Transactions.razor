@@ -4,49 +4,47 @@
 @inject NavigationManager navManager
 @implements IDisposable
 
+
 @if (AppState.IsAuth)
 {
-
-    <h3>Transaktioner</h3>
+    <div style="display: flex; justify-content: space-between;">
+        <h3>Transaktioner</h3>
+        <h5>@fromDate.ToShortDateString() - @toDate.ToShortDateString()</h5>
+    </div>
     <BSModal @ref="TransactionModal">
         <BSModalHeader OnClick="@(() => TransactionModal.Hide())">Skapa transaktion</BSModalHeader>
         <BSModalBody>
-            <div style="display:flex; flex-direction: column">
-                <label for="newtransactiondate">Transaktionsdatum</label>
-                <input id="newtransactiondate" name="newtransactiondate" type="date" min="1969-01-01" max="@DateTime.Today.ToShortDateString()" @bind-value="newTransaction.TransactionDate" />
-            </div>
-            <div style="display:flex; flex-direction: column">
-                <label for="transactiondescription">Beskrivning av transaktion</label>
-                <input id="transactiondescription" name="transactiondescription" type="text" @bind-value="newTransaction.Description" />
-            </div>
-            @if (descriptionError)
-            {
-                <div style="color: red;">*Ange beskrivning</div>
-            }
-            <br />
-            <div style="display:flex; flex-direction: column">
-                <select @bind="newTransaction.CategoryId">
-                    @if(newTransaction.CategoryId == null)
+            <BSForm Model="newTransaction">
+                <BSFormGroup>
+                    <BSLabel>TransaktionsDatum</BSLabel>
+                    <BSInput InputType="InputType.Date" MaxDate="@DateTime.Today.ToShortDateString()" @bind-Value="newTransaction.TransactionDate"></BSInput>
+                </BSFormGroup>
+                <BSFormGroup>
+                    <BSLabel>Beskrivning av transaktion</BSLabel>
+                    <BSInput @bind-Value="newTransaction.Description"></BSInput>
+                    @if (descriptionError)
                     {
-                        <option></option>
+                        <div style="color: red;">*Ange beskrivning</div>
                     }
-                    @foreach (var category in AppState.Categories)
+                </BSFormGroup>
+                <BSFormGroup>
+                    <BSLabel>Kategori</BSLabel>
+                    <BSInput InputType="InputType.Select" @bind-Value="newTransaction.CategoryId">
+                        @foreach (var category in AppState.Categories)
+                            {
+                            <option value="@category.Id">@category.Name</option>
+                            }
+                    </BSInput>
+                    @if (categoryError)
                     {
-                        <option value="@category.Id">@category.Name</option>
+                        <div style="color: red;">*Ange kategori</div>
                     }
-                </select>
-            </div>
-            @if (categoryError)
-            {
-                <div style="color: red;">*Ange kategori</div>
-            }
-            <div style="display:flex; flex-direction: column">
-                <label for="transactionamount">Summa</label>
-                <input id="transactionamount" name="transactionamount" type="number" @bind-value="newTransaction.Amount" />
-            </div>
-
-
-
+                </BSFormGroup>
+                <BSFormGroup>
+                    <BSLabel>Summa</BSLabel>
+                    <BSInput InputType="InputType.Number" @bind-Value="newTransaction.Amount"></BSInput>
+                </BSFormGroup>
+            </BSForm>
         </BSModalBody>
         <BSModalFooter>
             <BSButton Color="Color.Dark" @onclick="@(() => CreateTransaction())">Skapa transaktion</BSButton>
@@ -55,19 +53,19 @@
     </BSModal>
 }
 
-@if (AppState.Categories != null && AppState.Categories.Count > 0)
+@if (AppState.Categories != null)
 {
 
 
     <TransactionHeader ShowTransModal="ShowTransModal" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" SetCurrentCategory="SetCurrentCategory" Categories="AppState.Categories" CurrentCategory="currentCategory" />
 }
 
-@if (AppState.Categories != null && AppState.Categories.Count > 0 && AppState.Transactions != null && AppState.Transactions.Count > 0)
+@if (AppState.Categories != null && AppState.Transactions != null)
 {
 
     <TransactionBody Categories="AppState.Categories" CurrentCategory="currentCategory" FromDate="fromDate" ToDate="toDate" Index="index" PageSize="pageSize" Transactions="AppState.Transactions" />
 
-    <nav aria-label="Page navigation example">
+    <nav aria-label="Page navigation example" style="display: flex; justify-content: space-between">
         <ul class="pagination">
             <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index - 1))">Föregående</div></li>
             @for (int i = 0; i < (GetTransactionCount() / pageSize) + 1; i++)
@@ -78,6 +76,14 @@
             }
             <li class="page-item"><div class="page-link" style="cursor: pointer" @onclick="(() => SetIndex(index + 1))">Nästa</div></li>
         </ul>
+        <div style="display: flex">
+            <p style="margin-right: 5px;">Transaktioner per sida: </p>
+            <select style="height: 38px; width: 55px" @bind="pageSize">
+                <option value=5>5</option>
+                <option value=10>10</option>
+                <option value=20>20</option>
+            </select>
+        </div>
     </nav>
 }
 
@@ -123,7 +129,6 @@
             {
 
                 navManager.NavigateTo("/");
-                //throw;
             }
         }
     }
@@ -132,24 +137,16 @@
     {
         newTransaction = new Transaction()
         {
-            TransactionDate = DateTime.Today
+            TransactionDate = DateTime.Today,
+            CategoryId = "nm5tXgPCOwfavR9dbF2w",
         };
         TransactionModal.Show();
     }
 
     private async Task GetCategories()
     {
-        try
-        {
-            categories = await http.GetJsonAsync<List<Category>>("api/categories/" + AppState.User.Id);
-            AppState.UpdateCategories(this, categories);
-
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
+        categories = await http.GetJsonAsync<List<Category>>("api/categories/" + AppState.User.Id);
+        AppState.UpdateCategories(this, categories);
     }
 
     private async Task<UserResponse> ValidateSession()
@@ -160,17 +157,9 @@
 
     private async Task GetTransactions()
     {
-        try
-        {
-            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
-            AppState.UpdateTransactions(this, transactions);
+        transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
+        AppState.UpdateTransactions(this, transactions);
 
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
     }
     private async Task GetUser(string userId)
     {
@@ -208,13 +197,11 @@
         }
     }
 
-    public void SetIndex(int i) // bör endast baseras på vilken som är nuvarande kategori.
+    public void SetIndex(int i)
     {
         if (i >= 0 && i <= (GetTransactionCount() / pageSize))
         {
-            Console.WriteLine(i);
             index = i;
-            Console.WriteLine(index);
         }
     }
 

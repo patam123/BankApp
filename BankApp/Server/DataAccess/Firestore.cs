@@ -15,7 +15,6 @@ namespace BankApp.Server.DataAccess
 
         public Firestore()
         {
-            /// Enter your file path to your own API-key.
             string filepath = @"bankapp-2782c-1efd18eca9b1.json";
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", filepath);
             projectId = "bankapp-2782c";
@@ -48,14 +47,16 @@ namespace BankApp.Server.DataAccess
                         }
                     }
                 }
-
+                var defaultCategory = await GetDefaultCategory();
+                categoryList.Add(defaultCategory);
                 var sortedCategories = categoryList.OrderBy(x => x.Name).ToList();
                 return sortedCategories;
             }
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
+                return new List<Category>();
             }
 
         }
@@ -63,13 +64,13 @@ namespace BankApp.Server.DataAccess
         {
             try
             {
-                var catRef = firestore.Collection("categories");
-                await catRef.AddAsync(category);
+                var docRef = firestore.Collection("categories");
+                await docRef.AddAsync(category);
             }
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
         }
         public async void UpdateCategory(Category category)
@@ -82,7 +83,7 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
         }
 
@@ -91,12 +92,14 @@ namespace BankApp.Server.DataAccess
             try
             {
                 var docRef = firestore.Collection("categories").Document(id);
-                await docRef.DeleteAsync();
+                var result = await docRef.DeleteAsync();
+                UpdateTransactionsOnCategoryDelete(id);
+                DeleteExpenseLimitsOnCategoryDelete(id);
             }
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
 
         }
@@ -128,6 +131,26 @@ namespace BankApp.Server.DataAccess
             {
 
                 Console.WriteLine("Något gick fel");
+            }
+        }
+
+        public async Task<Category> GetDefaultCategory()
+        {
+            try
+            {
+                var documentSnapshot = await firestore.Collection("categories").Document("nm5tXgPCOwfavR9dbF2w").GetSnapshotAsync();
+
+                var category = documentSnapshot.ToDictionary();
+                string jsonCategory = JsonConvert.SerializeObject(category);
+                var newCategory = JsonConvert.DeserializeObject<Category>(jsonCategory);
+                newCategory.Id = documentSnapshot.Id;
+
+                return newCategory;
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
 
@@ -171,8 +194,8 @@ namespace BankApp.Server.DataAccess
             }
             catch (Exception)
             {
-
-                throw;
+                Console.WriteLine("Något gick fel");
+                return new List<Shared.Entities.Transaction>();
             }
         }
 
@@ -187,7 +210,7 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
 
         }
@@ -203,7 +226,33 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
+            }
+        }
+
+        public async void UpdateTransactionsOnCategoryDelete(string categoryId)
+        {
+            try
+            {
+                var snapshot = await firestore.Collection("transactions").GetSnapshotAsync();
+                var documents = snapshot.Documents;
+
+                var transactionsWithDeletedCategoryId = documents.Where(x => x.GetValue<string>("CategoryId") == categoryId);
+                while (transactionsWithDeletedCategoryId.Count() > 0)
+                {
+                    foreach (var transaction in transactionsWithDeletedCategoryId)
+                    {
+                        await transaction.Reference.UpdateAsync("CategoryId", "nm5tXgPCOwfavR9dbF2w");
+                    }
+                    snapshot = await firestore.Collection("transactions").GetSnapshotAsync();
+                    documents = snapshot.Documents;
+
+                    transactionsWithDeletedCategoryId = documents.Where(x => x.GetValue<string>("CategoryId") == categoryId);
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Något gick fel");
             }
         }
 
@@ -217,7 +266,7 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
         }
 
@@ -306,7 +355,8 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
+                return new List<ExpenseLimit>();
             }
 
         }
@@ -324,7 +374,7 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
         }
 
@@ -341,7 +391,7 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
 
         }
@@ -356,7 +406,7 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
         }
 
@@ -390,6 +440,32 @@ namespace BankApp.Server.DataAccess
             }
         }
 
+        public async void DeleteExpenseLimitsOnCategoryDelete(string categoryId)
+        {
+            try
+            {
+                var snapshot = await firestore.Collection("expenseLimits").GetSnapshotAsync();
+                var documents = snapshot.Documents;
+
+                var expenseLimitsWithDeletedCategoryId = documents.Where(x => x.GetValue<string>("CategoryId") == categoryId);
+                while (expenseLimitsWithDeletedCategoryId.Count() > 0)
+                {
+                    foreach (var transaction in expenseLimitsWithDeletedCategoryId)
+                    {
+                        await transaction.Reference.DeleteAsync();
+                    }
+                    snapshot = await firestore.Collection("expenseLimits").GetSnapshotAsync();
+                    documents = snapshot.Documents;
+
+                    expenseLimitsWithDeletedCategoryId = documents.Where(x => x.GetValue<string>("CategoryId") == categoryId);
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Något gick fel");
+            }
+        }
+
         // User methods
 
         public async Task<User> GetUser(string id)
@@ -411,7 +487,7 @@ namespace BankApp.Server.DataAccess
             }
             catch (Exception)
             {
-
+                Console.WriteLine("Något gick fel");
                 return new User();
             }
         }
@@ -427,7 +503,7 @@ namespace BankApp.Server.DataAccess
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("Något gick fel");
             }
         }
 

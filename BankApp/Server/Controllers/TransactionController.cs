@@ -9,14 +9,12 @@ using System.Threading.Tasks;
 
 namespace BankApp.Server.Controllers
 {
-    //[Route("api/transactions")]
     [ApiController]
     public class TransactionController : ControllerBase
     {
 
         Firestore firestore = new Firestore();
-        // GET: api/transactions
-        [HttpGet/*("{id}")*/]
+        [HttpGet]
         [Route("api/transactions/{id}")]
         public Task<List<Transaction>> Get(string id)
         {
@@ -37,7 +35,7 @@ namespace BankApp.Server.Controllers
             firestore.CreateTransaction(transaction);
         }
 
-        [HttpDelete/*("{id}")*/]
+        [HttpDelete]
         [Route("api/transactions/{id}")]
         public void Delete(string id)
         {

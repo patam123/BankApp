@@ -2,7 +2,7 @@
     <td>@Transaction.TransactionDate.ToShortDateString()</td>
     <td>@(Transaction.Description != null ? Transaction.Description : "")</td>
     <td>
-        <select class="btn btn-dark" @bind="Transaction.CategoryId">
+        <select class="btn btn-dark" @onchange="@((e) => SetCategory(Transaction, e))">
             @if (Transaction.CategoryId == null)
             {
                 <option value="">Ej vald</option>

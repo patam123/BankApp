@@ -12,7 +12,7 @@
     <h2>Redigera profil</h2>
     <br />
     <br />
-    <BSForm Model="registrationModel" OnValidSubmit="(() => UpdateUser())">
+    <BSForm Model="registrationModel" OnSubmit="(() => UpdateUser())">
         <BSFormGroup>
             <BSLabel For="firstname">Förnamn</BSLabel>
             <BSInput T="string" Id="firstname" InputType="InputType.Text" @bind-Value="registrationModel.FirstName" />
@@ -57,7 +57,6 @@
 
     BSModal DeleteUserModal;
     BSModal DeleteErrorModal;
-    bool deleteError;
     RegistrationModel registrationModel = new RegistrationModel();
 
     private async Task<string> UpdateUser()
@@ -115,7 +114,6 @@
             {
                 Console.WriteLine("error");
                 navManager.NavigateTo("/");
-                //throw;
             }
         }
         registrationModel.Email = AppState.User.Email;
@@ -167,17 +165,8 @@
 
     private async Task GetTransactions()
     {
-        try
-        {
-            var transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
-            AppState.UpdateTransactions(this, transactions);
-
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
+        var transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
+        AppState.UpdateTransactions(this, transactions);
     }
 
     private async Task GetUser(string userId)

@@ -13,44 +13,52 @@
 }
 
 
-@if (AppState.Categories != null && AppState.Categories.Count > 0 && AppState.Transactions != null && AppState.Transactions.Count > 0)
+@if (AppState.Categories != null && AppState.Transactions != null)
 {
-    <DetailedAccountInformationHeader BankAccount="bankAccount" FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" />
-    <DetailedAccountInformationBody SetCategorySums="SetCategorySums" FromDate="fromDate" ToDate="toDate" Categories="AppState.Categories" Transactions="AppState.Transactions" />
+<DetailedAccountInformationHeader FromDate="fromDate" ToDate="toDate" SetFromDate="SetFromDate" SetToDate="SetToDate" />
+<DetailedAccountInformationBody SetCategorySums="SetCategorySums" FromDate="fromDate" ToDate="toDate" Categories="AppState.Categories" Transactions="AppState.Transactions" />
 }
-
-@if (AppState.ExpenseLimits != null && AppState.ExpenseLimits.Count > 0)
+<br />
+@if (AppState.ExpenseLimits != null)
 {
     <div class="accordion">
         <BSCard CardType="CardType.Card">
             <BSCard CardType="CardType.Header">Utgiftsgränser</BSCard>
             <BSCard CardType="CardType.Body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Namn</th>
-                            <th>Kategori</th>
-                            <th>Startdatum</th>
-                            <th>Slutdatum</th>
-                            <th>Utgiftsmål</th>
-                            <th>Spenderad summa</th>
-                        </tr>
-                    </thead>
-                    @foreach (var expenseLimit in AppState.ExpenseLimits)
-                    {
-                        <tbody>
-                            <tr style="background-color: @(AppState.Transactions.Where(x => x.CategoryId == expenseLimit.CategoryId && x.TransactionDate >= expenseLimit.StartDate && x.TransactionDate <= expenseLimit.EndDate).Sum(x => x.Amount) > expenseLimit.Amount ? "red" : "seagreen")">
-                                <td>@expenseLimit.Name</td>
-                                <td>@AppState.Categories.Where(x => x.Id == expenseLimit.CategoryId).FirstOrDefault().Name</td>
-                                <td>@expenseLimit.StartDate.ToShortDateString()</td>
-                                <td>@expenseLimit.EndDate.ToShortDateString()</td>
-                                <td>@expenseLimit.Amount</td>
-                                <td>@AppState.Transactions.Where(x => x.CategoryId == expenseLimit.CategoryId && x.TransactionDate >= expenseLimit.StartDate && x.TransactionDate <= expenseLimit.EndDate).Sum(x => x.Amount)</td>
+                @if (AppState.ExpenseLimits.Count > 0)
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Namn</th>
+                                <th>Kategori</th>
+                                <th>Startdatum</th>
+                                <th>Slutdatum</th>
+                                <th>Utgiftsmål</th>
+                                <th>Spenderad summa</th>
                             </tr>
-                        </tbody>
-                    }
-                </table>
+                        </thead>
+                        @foreach (var expenseLimit in AppState.ExpenseLimits)
+                        {
+                            <tbody>
+                                <tr style="background-color: @(AppState.Transactions.Where(x => x.CategoryId == expenseLimit.CategoryId && x.TransactionDate >= expenseLimit.StartDate && x.TransactionDate <= expenseLimit.EndDate).Sum(x => x.Amount) > expenseLimit.Amount ? "red" : "seagreen")">
+                                    <td>@expenseLimit.Name</td>
+                                    <td>@AppState.Categories.Where(x => x.Id == expenseLimit.CategoryId).FirstOrDefault().Name</td>
+                                    <td>@expenseLimit.StartDate.ToShortDateString()</td>
+                                    <td>@expenseLimit.EndDate.ToShortDateString()</td>
+                                    <td>@expenseLimit.Amount</td>
+                                    <td>@AppState.Transactions.Where(x => x.CategoryId == expenseLimit.CategoryId && x.TransactionDate >= expenseLimit.StartDate && x.TransactionDate <= expenseLimit.EndDate).Sum(x => x.Amount)</td>
+                                </tr>
+                            </tbody>
+                        }
+                    </table>
+                }
+                else
+                {
+                    <p>Du har inte skapat några målsättningar för utgifter. Det kan du göra under <a href="/expenses">utgiftsmål</a>.</p>
+                }
             </BSCard>
+
         </BSCard>
 
     </div>
@@ -59,7 +67,6 @@
 @code{
 
 
-    private BankAccount bankAccount = new BankAccount() { Id = "9876543210" };
 
     DateTime fromDate = DateTime.Today.AddMonths(-1);
     DateTime toDate = DateTime.Today;
@@ -93,12 +100,10 @@
             {
 
                 navManager.NavigateTo("/");
-                //throw;
             }
         }
         else
         {
-            bankAccount = new BankAccount() { Id = "0123456789" };
             SetCategorySums();
         }
     }

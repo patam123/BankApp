@@ -28,7 +28,6 @@ namespace BankApp.Server.DataAccess
                 };
 
                 UserRecord userRecord = await FirebaseAuth.DefaultInstance.CreateUserAsync(args);
-                Console.WriteLine(userRecord.Uid);
                 return userRecord.Uid;
             }
             catch (FirebaseAuthException)
@@ -98,21 +97,22 @@ namespace BankApp.Server.DataAccess
 
                 var apiKeyDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(apiKeyFile);
 
-                string apiKey; 
+                string apiKey;
                 apiKeyDictionary.TryGetValue("KEY", out apiKey);
 
-                var http = new HttpClient();
+                using (var http = new HttpClient())
+                {
+                    var msg = new HttpRequestMessage(HttpMethod.Post, $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={apiKey}");
+                    var contentBody = $"{{\"email\":\"{user.Email}\",\"password\":\"{user.Password}\",\"returnSecureToken\":true}}";
+                    var content = new StringContent(contentBody);
+                    msg.Content = content;
+                    var response = await http.SendAsync(msg);
+                    var responseMsg = await response.Content.ReadAsStringAsync();
 
-                var msg = new HttpRequestMessage(HttpMethod.Post, $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={apiKey}");
-                var contentBody = $"{{\"email\":\"{user.Email}\",\"password\":\"{user.Password}\",\"returnSecureToken\":true}}";
-                var content = new StringContent(contentBody);
-                msg.Content = content;
-                var response = await http.SendAsync(msg);
-                var responseMsg = await response.Content.ReadAsStringAsync();
+                    var userAuth = JsonConvert.DeserializeObject<UserResponse>(responseMsg);
 
-                var userAuth = JsonConvert.DeserializeObject<UserResponse>(responseMsg);
-
-                return userAuth;
+                    return userAuth;
+                }
             }
 
             catch (Exception ex)

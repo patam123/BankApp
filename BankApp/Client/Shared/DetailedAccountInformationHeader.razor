@@ -1,6 +1,6 @@
 ﻿
 <div style="display: flex; justify-content: space-between; align-items: baseline">
-    <p style="font-size: 16px;">Detaljerad information</p><p>Kontonummer: @BankAccount.Id.Substring(0, 5) @BankAccount.Id.Substring(5, 2) @BankAccount.Id.Substring(7, 3)</p>
+    <p style="font-size: 16px;">Utgifter per kategori</p>
     <BSButton Color="Color.Dark" @onclick="@(() => DateModal.Show())">Ändra datum <span style="margin-left: 5px;" class="oi oi-calendar"></span></BSButton>
     <BSModal @ref="DateModal">
         <BSModalHeader OnClick="@(() => DateModal.Hide())">Ändra tidsintervall</BSModalHeader>

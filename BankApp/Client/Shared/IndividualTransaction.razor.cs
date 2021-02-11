@@ -28,17 +28,13 @@ namespace BankApp.Client.Shared
         {
 
         }
-        public async Task SetCategory(Transaction transaction, ChangeEventArgs e) // gör private?
+        public async Task SetCategory(Transaction transaction, ChangeEventArgs e)
         {
-            //UpdateCategory.Invoke(transaction, (string)e.Value);
-            //Category category = Categories.Find(x => x.Id.Equals(e.Value));
             transaction.CategoryId = (string)e.Value;
 
 
             await SetCatSum.InvokeAsync(e);
-            //Console.WriteLine($"{transaction.Description} har lagts till i kategorin \"{category.Name}\"");
             await Http.SendJsonAsync(HttpMethod.Put, "api/transactions", transaction);
-            // => skicka till api.
             StateHasChanged();
         }
 

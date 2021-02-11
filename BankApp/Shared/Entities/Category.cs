@@ -22,6 +22,7 @@ namespace BankApp.Shared.Entities
 
         public double TransactionSum { get; set; }
         public bool IsBeingModified { get; private set; }
+        public string ErrorMessage { get; set; }
 
         public void SetModificationState(bool isModifying)
         {

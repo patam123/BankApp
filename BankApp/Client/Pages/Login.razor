@@ -4,23 +4,34 @@
 @inject HttpClient http
 @implements IDisposable
 
-<BSForm Model="loginModel" OnSubmit="(() => OnSubmit())">
-    <BSFormGroup>
-        <BSLabel For="email">Email</BSLabel>
-        <BSInput T="string" Id="email" InputType="InputType.Email" @bind-Value="loginModel.Email" />
-    </BSFormGroup>
-    <BSFormGroup>
-        <BSLabel For="password">Lösenord</BSLabel>
-        <BSInput T="string" Id="password" InputType="InputType.Password" @bind-Value="loginModel.Password" />
-    </BSFormGroup>
-    <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Logga in</BSButton>
-</BSForm>
-<BSModal @ref="LoginModal">
-    <BSModalHeader OnClick="@(() => LoginModal.Hide())">Inloggning misslyckades</BSModalHeader>
-    <BSModalBody>Emailadress eller lösenord felaktigt.</BSModalBody>
-    <BSModalFooter><BSButton Color="Color.Dark" @onclick="@(() => LoginModal.Hide())">Stäng</BSButton></BSModalFooter>
-</BSModal>
-<NavLink href="register">Inget konto? Registrera</NavLink>
+@if (!isLoading)
+{
+    <BSForm Model="loginModel" OnSubmit="(() => OnSubmit())">
+        <BSFormGroup>
+            <BSLabel For="email">Email</BSLabel>
+            <BSInput T="string" Id="email" InputType="InputType.Email" @bind-Value="loginModel.Email" />
+        </BSFormGroup>
+        <BSFormGroup>
+            <BSLabel For="password">Lösenord</BSLabel>
+            <BSInput T="string" Id="password" InputType="InputType.Password" @bind-Value="loginModel.Password" />
+        </BSFormGroup>
+        <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Logga in</BSButton>
+    </BSForm>
+    <BSModal @ref="LoginModal">
+        <BSModalHeader OnClick="@(() => LoginModal.Hide())">Inloggning misslyckades</BSModalHeader>
+        <BSModalBody>Emailadress eller lösenord felaktigt.</BSModalBody>
+        <BSModalFooter><BSButton Color="Color.Dark" @onclick="@(() => LoginModal.Hide())">Stäng</BSButton></BSModalFooter>
+    </BSModal>
+    <NavLink href="register">Inget konto? Registrera</NavLink>
+}
+else
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
 
 @code {
 
@@ -28,6 +39,7 @@
     LoginModel loginModel = new LoginModel();
     private List<Transaction> transactions;
     private List<Category> categories;
+    bool isLoading;
 
     private async Task OnSubmit()
     {
@@ -50,8 +62,8 @@
 
                 await GetTransactions(userResp.UserId);
                 await GetExpenseLimits(userResp.UserId);
-                //skicka loginModel till api => få tillbaka response =>
                 await GetUser(userResp.UserId);
+
                 navManager.NavigateTo("/account");
             }
             else
@@ -66,9 +78,29 @@
         }
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+
+        try
+        {
+            isLoading = true;
+            var user = await ValidateSession();
+            if (string.IsNullOrEmpty(user.ErrorMessage))
+            {
+                await GetUser(user.UserId);
+                await GetCategories(user.UserId);
+                await GetTransactions(user.UserId);
+                await GetExpenseLimits(user.UserId);
+                navManager.NavigateTo("/account");
+            }
+            isLoading = false;
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("error");
+            navManager.NavigateTo("/");
+        }
 
     }
 
@@ -80,46 +112,26 @@
 
     private async Task GetCategories(string userId)
     {
-        try
-        {
-            categories = await http.GetJsonAsync<List<Category>>("api/categories/" + userId);
-            AppState.UpdateCategories(this, categories);
+        categories = await http.GetJsonAsync<List<Category>>("api/categories/" + userId);
+        AppState.UpdateCategories(this, categories);
+    }
 
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
+    private async Task<UserResponse> ValidateSession()
+    {
+        var user = await http.SendJsonAsync<UserResponse>(HttpMethod.Post, "/user/session", null);
+        return user;
     }
 
     private async Task GetTransactions(string userId)
     {
-        try
-        {
-            transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + userId);
-            AppState.UpdateTransactions(this, transactions);
-
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
+        transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + userId);
+        AppState.UpdateTransactions(this, transactions);
     }
 
     private async Task GetExpenseLimits(string userId)
     {
-        try
-        {
-            var expenseLimits = await http.GetJsonAsync<List<ExpenseLimit>>("api/expenselimits/" + userId);
-            AppState.UpdateExpenseLimits(this, expenseLimits);
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
+        var expenseLimits = await http.GetJsonAsync<List<ExpenseLimit>>("api/expenselimits/" + userId);
+        AppState.UpdateExpenseLimits(this, expenseLimits);
     }
 
     private async Task GetUser(string id)

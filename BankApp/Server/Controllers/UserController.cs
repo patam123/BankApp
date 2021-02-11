@@ -9,7 +9,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace BankApp.Server.Controllers
 {
@@ -112,10 +111,9 @@ namespace BankApp.Server.Controllers
             var sessionCookie = this.Request.Cookies["session"];
             if (string.IsNullOrEmpty(sessionCookie))
             {
-                // Session cookie is not available. Force user to login.
-                var user = new UserResponse();
-                user.ErrorMessage = "session cookie not available";
-                return user;
+                var userResponse = new UserResponse();
+                userResponse.ErrorMessage = "session cookie not available";
+                return userResponse;
             }
 
             try
@@ -125,16 +123,16 @@ namespace BankApp.Server.Controllers
                 var checkRevoked = true;
                 var decodedToken = await FirebaseAuth.DefaultInstance.VerifySessionCookieAsync(
                     sessionCookie, checkRevoked);
-                var user = new UserResponse();
-                user.UserId = decodedToken.Uid;
-                return user;
+                var userResponse = new UserResponse();
+                userResponse.UserId = decodedToken.Uid;
+                return userResponse;
             }
             catch (FirebaseAuthException)
             {
                 // Session cookie is invalid or revoked. Force user to login.
-                var user = new UserResponse();
-                user.ErrorMessage = "session no longer valid";
-                return user;
+                var userResponse = new UserResponse();
+                userResponse.ErrorMessage = "session no longer valid";
+                return userResponse;
             }
         }
         [HttpPost]

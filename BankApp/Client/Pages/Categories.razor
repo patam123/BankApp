@@ -39,12 +39,16 @@
 
         <br />
         <BSCard CardType="CardType.Card">
-            <BSCard CardType="CardType.Header">Redigera kategorier</BSCard>
+            <BSCard CardType="CardType.Header">Befintliga kategorier</BSCard>
             <BSCard CardType="CardType.Body">
                 @if (AppState.Categories != null && AppState.Categories.Count != 0)
                 {
                     @foreach (var category in AppState.Categories)
                     {
+                        if (category.Id != "nm5tXgPCOwfavR9dbF2w")
+                        {
+
+                        
                         if (category.IsBeingModified)
                         {
                             <BSForm style="width: auto;" IsInline="true" Model="category" OnSubmit="@(() => UpdateCategory(category))">
@@ -60,9 +64,10 @@
                                 <p style="margin-left: 10px;">@category.Name</p>
                                 <div>
                                     <BSButton Color="Color.Dark" OnClick="(() => category.SetModificationState(true))">Redigera</BSButton>
-                                    <BSButton Color="Color.Danger" OnClick="(() => RemoveCategory(category.Id))">Ta bort</BSButton> @*öppna modal => ta bort i modal*@
+                                    <BSButton Color="Color.Danger" OnClick="(() => OpenDeleteModal(category.Id))">Ta bort</BSButton>
                                 </div>
                             </div>
+                            }
                         }
                     }
                 }
@@ -72,19 +77,31 @@
 
     <br />
     <br />
+
+    <BSModal @ref="ConfirmDeleteCategory">
+        <BSModalHeader OnClick="(() => ConfirmDeleteCategory.Hide())">Ta bort kategori</BSModalHeader>
+        <BSModalBody><p>Vill du verkligen ta bort denna kategori?</p>
+        <p>Detta innebär att alla utgiftsmål kopplade till kategorin kommer att försvinna.</p></BSModalBody>
+        <BSModalFooter>
+            <BSButton Color="Color.Danger" OnClick="(() => RemoveCategory())">Bekräfta</BSButton>
+            <BSButton Color="Color.Dark" OnClick="(() => ConfirmDeleteCategory.Hide())">Avbryt</BSButton>
+        </BSModalFooter>
+    </BSModal>
     
 }
 
 @code {
 
+    BSModal ConfirmDeleteCategory { get; set; }
     BSModal NewCategoryModal { get; set; }
     Category newCategory = new Category();
-    //[CascadingParameter] public MainLayout MainLayout { get; set; }
     List<Category> categories = new List<Category>();
+
+    string categoryIdToDelete;
 
     bool newCategoryColorError;
     bool newCategoryNameError;
-    
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -110,7 +127,6 @@
             {
                 Console.WriteLine("error");
                 navManager.NavigateTo("/");
-                //throw;
             }
         }
 
@@ -134,18 +150,22 @@
     private async Task UpdateCategory(Category category)
     {
         category.SetModificationState(false);
-        // => skicka till api => databas
         await http.SendJsonAsync(HttpMethod.Put, "api/categories", category);
 
     }
 
-    private async void RemoveCategory(string categoryId)
+    private void OpenDeleteModal(string categoryId)
+    {
+        categoryIdToDelete = categoryId;
+        ConfirmDeleteCategory.Show();
+    }
+
+    private async void RemoveCategory()
     {
 
-        //skicka till api => databas
-        await http.DeleteAsync("api/categories/" + categoryId);
-        categories.RemoveAll(x => x.Id == categoryId);
-        AppState.UpdateCategories(this, categories);
+        await http.DeleteAsync("api/categories/" + categoryIdToDelete);
+        await GetCategories();
+        ConfirmDeleteCategory.Hide();
         StateHasChanged();
     }
 
@@ -174,7 +194,6 @@
         }
         else
         {
-            //skicka till api => databas
             await http.SendJsonAsync(HttpMethod.Post, "api/categories", newCategory);
             newCategory = new Category();
             await GetCategories();
@@ -182,23 +201,12 @@
 
     }
 
-   
-
-    
 
     private async Task GetTransactions()
     {
-        try
-        {
-            var transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
-            AppState.UpdateTransactions(this, transactions);
+        var transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + AppState.User.Id);
+        AppState.UpdateTransactions(this, transactions);
 
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
     }
     private async Task GetUser(string userId)
     {

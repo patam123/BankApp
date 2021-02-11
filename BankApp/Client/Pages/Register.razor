@@ -1,43 +1,58 @@
 ﻿@page "/register"
 @inject NavigationManager navManager
 @inject HttpClient http
+@inject AppStateContainer AppState
+@implements IDisposable
 @using System.Text.Json
 @using System.Text
 
+@if (!isLoading)
+{
 
-<BSForm Model="registrationModel" OnSubmit="(() => OnSubmit())">
-    <BSFormGroup>
-        <BSLabel For="firstname">Förnamn</BSLabel>
-        <BSInput T="string" Id="firstname" InputType="InputType.Text" @bind-Value="registrationModel.FirstName" />
-    </BSFormGroup>
-    <BSFormGroup>
-        <BSLabel For="lastname">Efternamn</BSLabel>
-        <BSInput T="string" Id="lastname" InputType="InputType.Text" @bind-Value="registrationModel.LastName" />
-    </BSFormGroup>
-    <BSFormGroup>
-        <BSLabel For="email">Email</BSLabel>
-        <BSInput T="string" Id="email" InputType="InputType.Email" @bind-Value="registrationModel.Email" />
-    </BSFormGroup>
-    <BSFormGroup>
-        <BSLabel For="password">Lösenord</BSLabel>
-        <BSInput T="string" Id="password" InputType="InputType.Password" @bind-Value="registrationModel.Password" />
-    </BSFormGroup>
-    <BSFormGroup>
-        <BSLabel For="repeatpassword">Upprepa lösenord</BSLabel>
-        <BSInput T="string" Id="repeatpassword" InputType="InputType.Password" @bind-Value="registrationModel.RepeatPassword" />
-    </BSFormGroup>
-    <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Registrera</BSButton>
-</BSForm>
 
-<BSModal @ref="RegisterModal">
-    <BSModalHeader OnClick="@(() => RegisterModal.Hide())">@errorHeader</BSModalHeader>
-    <BSModalBody>@errorMessage</BSModalBody>
-    <BSModalFooter>
-        <BSButton Color="Color.Dark" @onclick="@(() => RegisterModal.Hide())">Stäng</BSButton>
-    </BSModalFooter>
-</BSModal>
+    <BSForm Model="registrationModel" OnSubmit="(() => OnSubmit())">
+        <BSFormGroup>
+            <BSLabel For="firstname">Förnamn</BSLabel>
+            <BSInput T="string" Id="firstname" InputType="InputType.Text" @bind-Value="registrationModel.FirstName" />
+        </BSFormGroup>
+        <BSFormGroup>
+            <BSLabel For="lastname">Efternamn</BSLabel>
+            <BSInput T="string" Id="lastname" InputType="InputType.Text" @bind-Value="registrationModel.LastName" />
+        </BSFormGroup>
+        <BSFormGroup>
+            <BSLabel For="email">Email</BSLabel>
+            <BSInput T="string" Id="email" InputType="InputType.Email" @bind-Value="registrationModel.Email" />
+        </BSFormGroup>
+        <BSFormGroup>
+            <BSLabel For="password">Lösenord</BSLabel>
+            <BSInput T="string" Id="password" InputType="InputType.Password" @bind-Value="registrationModel.Password" />
+        </BSFormGroup>
+        <BSFormGroup>
+            <BSLabel For="repeatpassword">Upprepa lösenord</BSLabel>
+            <BSInput T="string" Id="repeatpassword" InputType="InputType.Password" @bind-Value="registrationModel.RepeatPassword" />
+        </BSFormGroup>
+        <BSButton ButtonType="ButtonType.Submit" Color="Color.Dark">Registrera</BSButton>
+    </BSForm>
 
-<NavLink href="/">Har du redan ett konto? Logga in</NavLink>
+    <BSModal @ref="RegisterModal">
+        <BSModalHeader OnClick="@(() => RegisterModal.Hide())">@errorHeader</BSModalHeader>
+        <BSModalBody>@errorMessage</BSModalBody>
+        <BSModalFooter>
+            <BSButton Color="Color.Dark" @onclick="@(() => RegisterModal.Hide())">Stäng</BSButton>
+        </BSModalFooter>
+    </BSModal>
+
+    <NavLink href="/">Har du redan ett konto? Logga in</NavLink>
+}
+
+else
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
 
 @code {
 
@@ -46,6 +61,7 @@
     private string errorHeader;
     private string errorMessage;
     RegistrationModel registrationModel = new RegistrationModel();
+    bool isLoading;
 
     private void ShowError(string message, string header)
     {
@@ -67,8 +83,6 @@
 
             if (registrationModel.Password.Equals(registrationModel.RepeatPassword))
             {
-                //skicka resultat till api  =>
-
                 StringBuilder sb = new StringBuilder();
 
                 if (registrationModel.FirstName != null)
@@ -114,7 +128,7 @@
                 }
                 else
                 {
-                    ShowError("Det finns redan en användare med den mailadressen.", "Användaren existerar");
+                    ShowError("Det finns redan en användare med den mailadressen. Välj en annan mailadress.", "Användaren finns redan");
                 }
                 StateHasChanged();
             }
@@ -144,6 +158,75 @@
     private async Task CreateUser(User user)
     {
         await http.SendJsonAsync(HttpMethod.Post, "user/createuserdoc", user);
+    }
+
+    private async Task GetCategories(string userId)
+    {
+        var categories = await http.GetJsonAsync<List<Category>>("api/categories/" + userId);
+        AppState.UpdateCategories(this, categories);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AppState.StateChanged += async (source, property) => await AppState_StateChanged(source, property);
+
+        try
+        {
+            isLoading = true;
+            var user = await ValidateSession();
+            if (string.IsNullOrEmpty(user.ErrorMessage))
+            {
+                await GetUser(user.UserId);
+                await GetCategories(user.UserId);
+                await GetTransactions(user.UserId);
+                await GetExpenseLimits(user.UserId);
+                navManager.NavigateTo("/account");
+            }
+            isLoading = false;
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("error");
+            navManager.NavigateTo("/");
+        }
+
+    }
+
+    private async Task<UserResponse> ValidateSession()
+    {
+        var user = await http.SendJsonAsync<UserResponse>(HttpMethod.Post, "/user/session", null);
+        return user;
+    }
+
+    private async Task GetTransactions(string userId)
+    {
+        var transactions = await http.GetJsonAsync<List<Transaction>>("api/transactions/" + userId);
+        AppState.UpdateTransactions(this, transactions);
+    }
+
+    private async Task GetExpenseLimits(string userId)
+    {
+        var expenseLimits = await http.GetJsonAsync<List<ExpenseLimit>>("api/expenselimits/" + userId);
+        AppState.UpdateExpenseLimits(this, expenseLimits);
+    }
+
+    private async Task GetUser(string id)
+    {
+        var user = await http.GetJsonAsync<User>("api/user/" + id);
+        AppState.SetAuthState(this, user, true);
+    }
+
+    private async Task AppState_StateChanged(ComponentBase source, string property)
+    {
+        if (source != this)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        AppState.StateChanged -= async (source, property) => await AppState_StateChanged(source, property);
     }
 
 }

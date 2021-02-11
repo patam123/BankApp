@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace BankApp.Server.Controllers
 {
@@ -17,7 +16,6 @@ namespace BankApp.Server.Controllers
 
         Firestore firestore = new Firestore();
 
-        // GET api/<ExpenseLimitController>/5
         [HttpGet]
         [Route("api/expenselimits/{id}")]
         public Task<List<ExpenseLimit>> Get(string id)
@@ -25,7 +23,6 @@ namespace BankApp.Server.Controllers
             return firestore.GetExpenseLimits(id);
         }
 
-        // POST api/<ExpenseLimitController>
         [HttpPost]
         [Route("api/expenselimits")]
         public void Post([FromBody] ExpenseLimit expenseLimit)
@@ -33,7 +30,6 @@ namespace BankApp.Server.Controllers
             firestore.AddExpenseLimit(expenseLimit);
         }
 
-        // PUT api/<ExpenseLimitController>/5
         [HttpPut]
         [Route("api/expenselimits")]
         public void Put([FromBody] ExpenseLimit expenseLimit)
@@ -41,7 +37,6 @@ namespace BankApp.Server.Controllers
             firestore.UpdateExpenseLimit(expenseLimit);
         }
 
-        // DELETE api/<ExpenseLimitController>/5
         [HttpDelete]
         [Route("api/expenselimits/{id}")]
         public void Delete(string id)

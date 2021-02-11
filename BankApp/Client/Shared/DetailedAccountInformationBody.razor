@@ -1,44 +1,49 @@
 ﻿
+@if (Categories.Count > 0)
+{
+    <div class="accordion">
+        <BSCollapseGroup>
+            @foreach (var category in Categories)
+            {
+                <BSCollapseItem>
+                    <BSCard CardType="CardType.Card">
+                        <BSCard CardType="CardType.Header">
 
-<div class="accordion">
-    <BSCollapseGroup>
-        @foreach (var category in Categories)
-        {
-            <BSCollapseItem>
-                <BSCard CardType="CardType.Card">
-                    <BSCard CardType="CardType.Header">
-                        
-                        <BSCollapseToggle><span class="oi oi-caret-right"></span>@("\t\t\t")<span>@category.Name</span> @*<span>@FromDate.ToShortDateString() - @ToDate.ToShortDateString()</span>*@@("\t\t\t")<span>@(category.TransactionSum == 0 ? "-" : category.TransactionSum.ToString() + " kr")</span></BSCollapseToggle> @*sätta class på collapse-toggle?*@
-                    @*<div style="display: flex; justify-content: space-between"></div>*@
-                    </BSCard>
-                    <BSCollapse>
-                        <BSCard CardType="CardType.Body">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Transaktionsdatum</th>
-                                        <th>Transaktionsnamn</th>
-                                        <th>Kategori</th>
-                                        <th>Summa</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var transaction in Transactions)
-                                    {
-                                        if (transaction.CategoryId.Equals(category.Id) && transaction.TransactionDate >= FromDate && transaction.TransactionDate <= ToDate)
-                                        {
-                                            <IndividualTransaction IsTransactionPage="false" SetCatSum="SetCategorySums" Transaction="transaction" Categories="Categories" />
-                                        }
-                                    }
-                                </tbody>
-                            </table>
+                            <BSCollapseToggle><span class="oi oi-caret-right"></span>@("\t\t\t")<span>@category.Name</span>@("\t\t\t")<span>@(category.TransactionSum == 0 ? "-" : category.TransactionSum.ToString() + " kr")</span></BSCollapseToggle>
                         </BSCard>
-                    </BSCollapse>
-                </BSCard>
-            </BSCollapseItem>
-        }
-    </BSCollapseGroup>
-</div>
+                        <BSCollapse>
+                            <BSCard CardType="CardType.Body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Transaktionsdatum</th>
+                                            <th>Transaktionsnamn</th>
+                                            <th>Kategori</th>
+                                            <th>Summa</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var transaction in Transactions)
+                                        {
+                                            if (transaction.CategoryId.Equals(category.Id) && transaction.TransactionDate >= FromDate && transaction.TransactionDate <= ToDate)
+                                            {
+                                                <IndividualTransaction IsTransactionPage="false" SetCatSum="SetCategorySums" Transaction="transaction" Categories="Categories" />
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </BSCard>
+                        </BSCollapse>
+                    </BSCard>
+                </BSCollapseItem>
+            }
+        </BSCollapseGroup>
+    </div>
+}
+else
+{
+    <p>Du saknar kategorier och transaktioner. För att komma igång, börja med att skapa <a href="/categories">kategorier</a>.</p>
+}
 
 
 @code {
@@ -48,5 +53,5 @@
     [Parameter] public DateTime ToDate { get; set; }
     [Parameter] public EventCallback SetCategorySums { get; set; }
 
-    
+
 }
