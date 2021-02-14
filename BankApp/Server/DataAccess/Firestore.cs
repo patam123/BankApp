@@ -87,14 +87,14 @@ namespace BankApp.Server.DataAccess
             }
         }
 
-        public async void DeleteCategory(string id)
+        public async Task DeleteCategory(string id)
         {
             try
             {
                 var docRef = firestore.Collection("categories").Document(id);
                 var result = await docRef.DeleteAsync();
-                UpdateTransactionsOnCategoryDelete(id);
-                DeleteExpenseLimitsOnCategoryDelete(id);
+                await UpdateTransactionsOnCategoryDelete(id);
+                await DeleteExpenseLimitsOnCategoryDelete(id);
             }
             catch (Exception)
             {
@@ -230,7 +230,7 @@ namespace BankApp.Server.DataAccess
             }
         }
 
-        public async void UpdateTransactionsOnCategoryDelete(string categoryId)
+        public async Task UpdateTransactionsOnCategoryDelete(string categoryId)
         {
             try
             {
@@ -440,7 +440,7 @@ namespace BankApp.Server.DataAccess
             }
         }
 
-        public async void DeleteExpenseLimitsOnCategoryDelete(string categoryId)
+        public async Task DeleteExpenseLimitsOnCategoryDelete(string categoryId)
         {
             try
             {

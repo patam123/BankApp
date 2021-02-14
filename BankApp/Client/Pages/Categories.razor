@@ -18,19 +18,21 @@
                     <BSFormGroup>
                         <BSLabel>Namn</BSLabel>
                         <BSInput @bind-Value="newCategory.Name" placeholder="Namnge kategori..."></BSInput>
+                        @if (newCategoryNameError)
+                        {
+                            <div style="color: red;">*Ange namn</div>
+                        }
                     </BSFormGroup>
-                    @if (newCategoryNameError)
-                    {
-                        <div style="color: red;">*Ange namn</div>
-                    }
+                    
                     <BSFormGroup>
                         <BSLabel>Färg</BSLabel>
                         <BSInput InputType="InputType.Color" @bind-Value="newCategory.Color"></BSInput>
+                        @if (newCategoryColorError)
+                        {
+                            <div style="color: red;">*Ange färg</div>
+                        }
                     </BSFormGroup>
-                    @if (newCategoryColorError)
-                    {
-                        <div style="color: red;">*Ange färg</div>
-                    }
+                    
                     <BSButton Color="Color.Dark" ButtonType="ButtonType.Submit">Lägg till</BSButton>
                 </BSForm>
             </BSModalBody>
@@ -165,6 +167,8 @@
 
         await http.DeleteAsync("api/categories/" + categoryIdToDelete);
         await GetCategories();
+        await GetTransactions();
+        await GetExpenseLimits();
         ConfirmDeleteCategory.Hide();
         StateHasChanged();
     }

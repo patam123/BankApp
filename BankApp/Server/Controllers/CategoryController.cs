@@ -38,9 +38,9 @@ namespace BankApp.Server.Controllers
 
         [HttpDelete]
         [Route("api/categories/{id}")]
-        public void Delete(string id)
+        public async Task Delete(string id)
         {
-            firestore.DeleteCategory(id);
+            await firestore.DeleteCategory(id);
         }
         
         [HttpDelete]
